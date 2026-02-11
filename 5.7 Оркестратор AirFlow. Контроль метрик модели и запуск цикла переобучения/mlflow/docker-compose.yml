@@ -71,4 +71,4 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB_NAME} --serve-artifacts --artifacts-destination s3://${MLFLOW_S3_BUCKET}/ --host 0.0.0.0
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB_NAME} --serve-artifacts --artifacts-destination s3://${MLFLOW_S3_BUCKET}/ --host 0.0.0.0 --allowed-hosts "*"
