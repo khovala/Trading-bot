@@ -23,7 +23,8 @@ def compare_models(
         eval_dataset_path: pathlib.Path,
         target_column_name: str,
         new_model_path: pathlib.Path,
-        reports_path: pathlib.Path
+        reports_path: pathlib.Path,
+        bucket_name: str,
 ) -> None:
     reports_path.mkdir(parents=True, exist_ok=True)
 
@@ -39,7 +40,7 @@ def compare_models(
 
     with tempfile.TemporaryFile() as fp:
         fp.write(s3_client.get_object(
-            Bucket='otus-test-bucket',
+            Bucket=bucket_name,
             Key='crypto_sentimnet_clf/crypto_sentiment_clf.joblib'
         )['Body'].read())
         fp.seek(0)

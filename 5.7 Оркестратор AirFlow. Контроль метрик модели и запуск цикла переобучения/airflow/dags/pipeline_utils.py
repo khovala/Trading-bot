@@ -28,4 +28,4 @@ def delete_venv(project_name: str) -> None:
     shutil.rmtree(venv_path, ignore_errors=True)
 
 if __name__ == '__main__':
-    create_new_venv(project_name='crypto_sentiment', requirements_file='/opt/airflow/dags/scripts/requirements.txt')
+    create_new_venv(project_name='crypto_sentiment', requirements_file='/opt/airflow/dags/requirements.txt')
