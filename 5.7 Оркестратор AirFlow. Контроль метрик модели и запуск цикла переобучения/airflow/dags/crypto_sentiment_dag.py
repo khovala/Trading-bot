@@ -109,7 +109,8 @@ task_6 = BashOperator(
                 f'/opt/airflow/data/processed/validation_dataset.csv '
                 f'label '
                 f'/opt/airflow/models/crypto_sentiment_clf.joblib '
-                f'/opt/airflow/reports',
+                f'/opt/airflow/reports '
+                f'otus-demo',
     dag=dag,
 )
 
