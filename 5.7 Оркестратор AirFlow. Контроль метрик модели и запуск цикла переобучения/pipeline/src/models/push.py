@@ -17,6 +17,7 @@ app = typer.Typer()
 @app.command()
 def push_to_s3(
     model_path: pathlib.Path,
+    bucket_name: str,
     reports_path: pathlib.Path
     ) -> None:
     with open(f'{reports_path}/best_model.json', 'r') as f:
@@ -32,7 +33,7 @@ def push_to_s3(
     )
     s3_client.upload_file(
         model_path,
-        'otus-test-bucket',
+        bucket_name,
         'crypto_sentimnet_clf_new/crypto_sentiment_clf.joblib'
         )
 
