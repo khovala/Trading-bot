@@ -1,3 +1,4 @@
+
 # MOEX Sandbox Trading Platform (Phase 1 Skeleton)
 
 Modular, sandbox-first architecture for MOEX equity trading with T-Invest API, staged retraining, MLflow tracking, and observability.
@@ -106,3 +107,7 @@ params.yaml pipeline.yaml pyproject.toml .env.example README.md
 - No broker integration implementation
 - No backtesting implementation
 - Interfaces and stubs only
+
+# Trading-bot
+ML for finances (OTUS course)
+88676d9b4169d2e96049d6d99c24ff8a96c63bd4
