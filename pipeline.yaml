@@ -1,0 +1,129 @@
+version: "1"
+name: moex_retrain_pipeline
+
+stages:
+  download_market_data:
+    purpose: Pull raw MOEX market data from sandbox-compatible source.
+    deps: [params.yaml]
+    outs: [data/raw/market]
+    reports: [reports/download_market_data.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: false}
+
+  preprocess_market_data:
+    purpose: Validate and normalize OHLCV chronology.
+    deps: [data/raw/market, params.yaml]
+    outs: [data/interim/market]
+    reports: [reports/preprocess_market_data.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  download_news_data:
+    purpose: Collect raw financial news from RSS adapters.
+    deps: [params.yaml]
+    outs: [data/raw/news]
+    reports: [reports/download_news_data.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: false}
+
+  preprocess_news_data:
+    purpose: Normalize text, timestamps, dedup and source metadata.
+    deps: [data/raw/news, params.yaml]
+    outs: [data/interim/news]
+    reports: [reports/preprocess_news_data.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  map_news_to_instruments:
+    purpose: Map issuer mentions to MOEX tickers/entities.
+    deps: [data/interim/news, params.yaml]
+    outs: [data/processed/news/mapped_news.parquet]
+    reports: [reports/map_news_to_instruments.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  generate_market_features:
+    purpose: Build market feature set with strict chronology.
+    deps: [data/interim/market, params.yaml]
+    outs: [data/processed/market/features/market_features.parquet]
+    reports: [reports/generate_market_features.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  generate_news_features:
+    purpose: Build ticker-time-bucket news features.
+    deps: [data/processed/news/mapped_news.parquet, params.yaml]
+    outs: [data/processed/news/features]
+    reports: [reports/generate_news_features.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  merge_feature_sets:
+    purpose: Merge market/news features with leakage-safe joins.
+    deps: [data/processed/market/features/market_features.parquet, data/processed/news/features/news_features.parquet, params.yaml]
+    outs: [data/processed/merged/train.parquet, data/processed/merged/validation.parquet, data/processed/merged/test.parquet]
+    reports: [reports/merge_feature_sets.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  train_base_models:
+    purpose: Train baseline market-only models.
+    deps: [data/processed/merged, params.yaml]
+    outs: [models/base]
+    reports: [reports/train_base_models.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  train_news_model:
+    purpose: Train dedicated news model with normalized outputs.
+    deps: [data/processed/news/features, params.yaml]
+    outs: [models/news]
+    reports: [reports/train_news_model.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  train_ensemble_model:
+    purpose: Train weighted ensemble/meta placeholder.
+    deps: [models/base, models/news, params.yaml]
+    outs: [models/ensemble]
+    reports: [reports/train_ensemble_model.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  evaluate_models:
+    purpose: Evaluate holdout metrics and calibration.
+    deps: [models/ensemble, data/processed/merged, params.yaml]
+    outs: [artifacts/evaluation]
+    reports: [reports/evaluate_models.json, reports/evaluate_models.md]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  backtest_strategy:
+    purpose: Run walk-forward backtest with realistic assumptions.
+    deps: [models/ensemble, data/processed/merged, params.yaml]
+    outs: [artifacts/backtests]
+    reports: [reports/backtest_strategy.json, reports/backtest_strategy.md]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  compare_with_production:
+    purpose: Candidate-vs-champion comparison and decision.
+    deps: [reports/evaluate_models.json, reports/backtest_strategy.json, params.yaml]
+    outs: [artifacts/comparison]
+    reports: [reports/compare_with_production.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  promote_model:
+    purpose: Register/pin promoted model metadata.
+    deps: [artifacts/comparison, params.yaml]
+    outs: [models/registry]
+    reports: [reports/promote_model.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  publish_artifacts:
+    purpose: Bundle production candidate artifacts and manifests.
+    deps: [models/registry, artifacts, params.yaml]
+    outs: [artifacts/published]
+    reports: [reports/publish_artifacts.json]
+    mlflow: {log_params: true, log_metrics: false, log_artifacts: true}
+
+  generate_reports:
+    purpose: Produce consolidated markdown/json run report.
+    deps: [reports, params.yaml]
+    outs: [reports/final]
+    reports: [reports/final/retrain_report.md, reports/final/retrain_report.json]
+    mlflow: {log_params: false, log_metrics: false, log_artifacts: true}
+
+  run_retrain_pipeline:
+    purpose: Orchestrate all stages in dependency order.
+    deps: [pipeline.yaml, params.yaml]
+    outs: [reports/final]
+    reports: [reports/run_retrain_pipeline.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}

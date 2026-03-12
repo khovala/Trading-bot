@@ -1,0 +1,583 @@
+MOEX Sandbox Trading Bot - Step-by-Step Pipeline Description
+===========================================================
+
+This document provides a full, detailed, step-by-step description of what was implemented in this project so far, including architecture, data pipelines, modeling, evaluation, monitoring, and reporting.
+
+------------------------------------------------------------
+0) PROJECT MISSION AND OPERATING PRINCIPLES
+------------------------------------------------------------
+
+Primary objective:
+- Build a modular algorithmic trading sandbox platform for MOEX equities.
+- Start in T-Invest sandbox and dry-run mode.
+- Use deterministic, incremental implementation suitable for Cursor context limits.
+- Keep model logic, orchestration, risk, execution, and broker integrations separated.
+
+Key principles enforced throughout implementation:
+- Sandbox-first defaults and safety flags.
+- No hardcoded secrets.
+- Explicit stage-based pipeline.
+- Reproducible artifacts and reports.
+- Chronology-preserving, leakage-aware data processing.
+- Standardized prediction output schema across model families.
+- MLflow-first experiment tracking.
+- Observability via Prometheus/Grafana and alerting skeleton via Telegram.
+
+
+------------------------------------------------------------
+1) PHASE 1 FOUNDATION: SCAFFOLDING AND ARCHITECTURE
+------------------------------------------------------------
+
+1.1 Repository structure created
+- Apps layer:
+  - apps/api
+  - apps/trader
+  - apps/trainer
+  - apps/backtester
+  - apps/notifier
+- Source layer:
+  - src/config
+  - src/domain
+  - src/data (ingestion/preprocessing/schemas/stores)
+  - src/features
+  - src/nlp
+  - src/models
+  - src/training
+  - src/orchestration
+  - src/risk
+  - src/execution
+  - src/backtesting
+  - src/monitoring
+  - src/utils
+- Infra and data folders:
+  - infra/prometheus, infra/grafana, infra/alertmanager, infra/nginx
+  - data/raw, data/interim, data/processed
+  - reports, models, artifacts, tests, scripts, notebooks
+
+1.2 Root config files created
+- pyproject.toml (Python 3.11+, dependencies, dev tooling)
+- .env.example (runtime/MLflow/T-Invest placeholders)
+- params.yaml (global config, data/model/risk/backtest/tracking params)
+- pipeline.yaml (18-stage manifest)
+- README.md (architecture and ADR-style baseline decisions)
+- docker-compose.yml (api/trainer/prometheus/grafana/alertmanager skeleton)
+
+1.3 Core domain contracts
+- src/domain/enums.py:
+  - TradeAction, RunMode, PipelineStageStatus, NewsSentimentLabel
+- src/domain/schemas.py:
+  - Prediction
+  - ModelOutput
+  - OrchestratorDecision (with decision_id, explanation fields)
+  - StageResult (run_id, timing, metrics, artifacts)
+  - RawNewsItem, TickerMappingResult
+
+1.4 Settings and safety guards
+- src/config/settings.py:
+  - pydantic-settings based settings loading.
+  - cross-field trading safety validation:
+    - live mode requires explicit enable and no dry-run.
+    - real trading flag forbidden in non-live modes.
+
+1.5 FastAPI skeleton
+- apps/api/main.py:
+  - /health, /ready, /metrics, /models, /signals/latest,
+    /trade/run-once, /retrain/run-once, /backtests/latest, /
+  - request metrics middleware and readiness checks.
+
+
+------------------------------------------------------------
+2) PIPELINE CORE: DVC-INSPIRED STAGE SYSTEM
+------------------------------------------------------------
+
+2.1 Pipeline abstractions
+- src/training/pipeline/base.py:
+  - StageContext
+  - StageSpec (inputs/outputs/reports/mlflow)
+  - PipelineStage abstract class
+
+2.2 Manifest and params loading
+- src/training/pipeline/manifest.py:
+  - safe YAML readers
+  - pipeline manifest and params loading helpers
+
+2.3 Stage registry
+- src/training/pipeline/registry.py:
+  - explicit stage class registration
+  - placeholder registration
+  - manifest-driven fallback stage registration
+
+2.4 Pipeline runner
+- src/training/pipeline/runner.py:
+  - stage spec extraction from manifest
+  - dependency validation hooks
+  - output preparation hooks
+  - stage context creation
+  - execution by stage name
+  - report writing invocation
+  - workspace path safety checks to prevent escaping project root
+
+2.5 Report writing helpers
+- src/training/pipeline/reports.py:
+  - writes stage outputs into JSON/MD reports.
+
+2.6 Trainer CLI
+- apps/trainer/run_stage.py:
+  - runs one stage from manifest
+  - supports listing stages
+  - strict dependency mode.
+
+2.7 Core pipeline tests
+- Registry and runner tests added for:
+  - registration
+  - dispatch
+  - missing input behavior
+  - strict mode behavior
+  - stage params loading
+  - workspace path safety.
+
+
+------------------------------------------------------------
+3) MARKET DATA SUBSYSTEM
+------------------------------------------------------------
+
+3.1 Market schemas
+- src/data/schemas/market.py:
+  - InstrumentRecord
+  - CandleRecord with OHLC consistency validation and UTC timestamp normalization.
+
+3.2 Market ingestion abstraction
+- src/data/ingestion/market/base.py:
+  - MarketDataSource interface
+  - HistoricalCandlesDownloader
+  - InstrumentMetadataLoader
+
+3.3 Offline adapter
+- src/data/ingestion/market/adapters.py:
+  - MockMarketDataSource for deterministic offline dataset generation.
+  - provider factory boundary for future real adapters.
+
+3.4 Storage layout helpers
+- src/data/market_store/layout.py:
+  - raw/interim paths
+  - JSON/JSONL read/write helpers.
+
+3.5 Market preprocessing
+- src/data/preprocessing/market/validation.py:
+  - timestamp normalization
+  - schema validation
+  - duplicate bar detection
+  - missing bar detection
+- src/data/preprocessing/market/processor.py:
+  - deduplication, sorting, metrics aggregation.
+
+3.6 Market stages
+- src/training/stages/market.py:
+  - DownloadMarketDataStage
+  - PreprocessMarketDataStage
+
+3.7 Market tests
+- validation tests:
+  - duplicates
+  - missing bars
+  - timestamp normalization
+  - schema enforcement
+- stage smoke tests for download + preprocess outputs.
+
+
+------------------------------------------------------------
+4) NEWS INGESTION AND PREPROCESSING SUBSYSTEM
+------------------------------------------------------------
+
+4.1 News schemas
+- src/data/schemas/news.py:
+  - RawNewsItemRecord
+  - ProcessedNewsItemRecord (cleaned_text)
+
+4.2 News source abstraction
+- src/data/ingestion/news/base.py:
+  - NewsSourceAdapter interface.
+
+4.3 RSS/Atom adapter
+- src/data/ingestion/news/rss.py:
+  - public feed parser
+  - RFC822/ISO timestamp parsing
+  - RSS item and Atom entry support
+  - feed link extraction
+  - phase-2 Telegram adapter placeholder interface.
+
+4.4 News storage
+- src/data/ingestion/news/storage.py:
+  - raw/interim JSONL paths
+  - mapped/features parquet paths
+  - read/write JSONL and read/write parquet helpers.
+
+4.5 News preprocessing
+- src/data/preprocessing/news/cleaning.py:
+  - HTML/whitespace cleanup
+  - deduplication keying (url-first, hash fallback)
+  - processed output creation.
+
+4.6 News stages
+- src/training/stages/news.py:
+  - DownloadNewsDataStage
+  - PreprocessNewsDataStage
+  - source failure accounting
+  - optional fail-if-all-sources-failed
+  - feature flag handling when news disabled.
+
+4.7 News tests
+- duplicate removal
+- timestamp parsing
+- text cleaning
+- Atom parser compatibility
+- stage run tests and failure-path tests.
+
+
+------------------------------------------------------------
+5) ENTITY/TICKER MAPPING + NEWS FEATURES
+------------------------------------------------------------
+
+5.1 Dictionary mapping assets
+- src/nlp/entity_mapping/dictionaries.py:
+  - RU/EN issuer aliases
+  - ticker->issuer map
+  - sector keyword map
+  - sector fallback ticker map.
+
+5.2 Mapping contracts and model
+- src/nlp/entity_mapping/schemas.py:
+  - MappedNewsItem dataclass.
+- src/nlp/entity_mapping/base.py:
+  - mapping interface.
+- src/nlp/entity_mapping/dictionary_mapper.py:
+  - exact ticker detect
+  - alias mapping
+  - sector fallback
+  - unmapped fallback with confidence score.
+
+5.3 News feature generation
+- src/features/news/aggregation.py:
+  - deterministic bucket aggregation by ticker + time bucket.
+  - features:
+    - article_count
+    - positive_count
+    - negative_count
+    - sentiment_mean
+    - weighted_sentiment_mean
+    - abnormal_news_volume
+    - recency_weighted_sentiment
+    - breaking_news_flag
+    - event flag placeholders (mna/sanctions/management).
+
+5.4 News mapping/features stages
+- src/training/stages/news_features.py:
+  - MapNewsToInstrumentsStage -> mapped_news.parquet
+  - GenerateNewsFeaturesStage -> news_features.parquet
+
+5.5 Tests
+- mapping quality checks
+- deterministic bucketed aggregation checks
+- stage integration for map->feature flow.
+
+
+------------------------------------------------------------
+6) MARKET FEATURES + MERGED DATASET PREPARATION
+------------------------------------------------------------
+
+6.1 Feature store helpers
+- src/data/feature_store/io.py:
+  - parquet IO helpers.
+- src/data/feature_store/paths.py:
+  - path contracts for market features and merged splits.
+
+6.2 Market feature schema
+- src/data/schemas/features.py:
+  - MarketFeatureRow validation schema.
+
+6.3 Market feature engineering
+- src/features/market/engineering.py:
+  - return_1
+  - log_return_1
+  - rolling_volatility_20
+  - momentum_10
+  - rsi_14
+  - macd, macd_signal
+  - atr_14
+  - zscore_20
+  - volume ratio/z-score
+  - trend/volatility regimes.
+
+6.4 Merge and split
+- src/features/merge/datasets.py:
+  - market + news merge
+  - chronology-safe split into train/validation/test.
+  - anti-leakage improvement: lagged bucket join.
+
+6.5 Stages
+- src/training/stages/features.py:
+  - GenerateMarketFeaturesStage
+  - MergeFeatureSetsStage.
+
+6.6 Outputs
+- data/processed/market/features/market_features.parquet
+- data/processed/merged/train.parquet
+- data/processed/merged/validation.parquet
+- data/processed/merged/test.parquet
+
+6.7 Tests
+- feature columns presence
+- split ordering and leakage-safe behavior
+- lagged-news merge behavior
+- ratio validation checks.
+
+
+------------------------------------------------------------
+7) MLFLOW AS FIRST-CLASS SUBSYSTEM
+------------------------------------------------------------
+
+7.1 MLflow abstractions
+- src/training/tracking/mlflow_utils.py:
+  - MLflowConfig
+  - MLflowTracker
+  - builder helper and artifact helper
+  - params/metrics/artifacts logging
+  - dataset metadata logging
+  - feature schema logging
+  - model artifact metadata logging
+  - comparison decision logging
+  - nested run support.
+
+7.2 Robustness behavior
+- fail-open by default (strict=false)
+- strict mode available
+- internal last_error tracking for degraded observability.
+
+7.3 Stage integration
+- MLflow used by:
+  - train_base_models
+  - train_news_model
+  - train_ensemble_model
+  - evaluate_models
+  - backtest_strategy
+  - compare_with_production
+  - promote_model
+  - publish_artifacts
+  - generate_reports.
+
+7.4 Tests
+- config precedence tests
+- run/log API wrapper tests
+- disabled mode test
+- fail-open and strict-mode behavior tests
+- stage registration test for MLflow-backed stage binding.
+
+
+------------------------------------------------------------
+8) MODEL LAYER IMPLEMENTATION
+------------------------------------------------------------
+
+8.1 Base contracts
+- src/models/base/interface.py
+- src/models/base/schemas.py
+- standardized prediction object and model lifecycle interface.
+
+8.2 Baseline models
+- Tabular regression baseline
+- GRU regression skeleton
+- Binary classifier
+- Multiclass BUY/HOLD/SELL classifier
+- News feature model
+- Weighted ensemble
+- Stacking placeholder
+
+8.3 Serialization
+- pickle save/load for model artifacts
+- metadata manifests in models/*/metadata.json.
+
+8.4 Training stage integration
+- src/training/stages/model_training.py:
+  - TrainBaseModelsStage
+  - TrainNewsModelStage
+  - TrainEnsembleModelStage
+- each stage trains, saves models, writes metadata, and logs MLflow metrics/artifacts.
+
+8.5 Hardening updates
+- ensemble weights sanitized (non-negative + normalized fallback)
+- prediction horizon propagated from params
+- feature schema and dataset metadata logged in training stages.
+
+8.6 Tests
+- standardized prediction contract tests
+- ensemble combine behavior tests
+- training-stage artifact write test.
+
+
+------------------------------------------------------------
+9) BACKTESTING, REPORTING, MONITORING, ALERTING
+------------------------------------------------------------
+
+9.1 Backtesting subsystem
+- src/backtesting/engine.py:
+  - bar-driven single-asset simulation
+  - commissions/slippage/lot rules
+  - delayed execution
+  - benchmark equity tracking.
+- src/backtesting/metrics.py:
+  - pnl/drawdown/sharpe/sortino/calmar/hit ratio/turnover/exposure.
+- src/backtesting/reporting.py:
+  - summary/equity/trades JSON
+  - plot payload JSONs:
+    - equity vs benchmark
+    - drawdown
+    - rolling performance
+    - trade distribution.
+
+9.2 Evaluation/reporting stages
+- src/training/stages/evaluation_reporting.py:
+  - EvaluateModelsStage
+  - BacktestStrategyStage
+  - CompareWithProductionStage
+  - PromoteModelStage
+  - PublishArtifactsStage
+  - GenerateReportsStage
+- includes MLflow logs and generated reports/artifacts.
+
+9.3 Leakage hardening
+- backtest signal source made explicit via config.
+- removed fallback to return_1 in signal generation.
+- stage params:
+  - signal_column
+  - walk_forward_folds.
+
+9.4 Walk-forward support
+- fold-based walk-forward summary in backtest stage:
+  - walk_forward_sharpe_mean
+  - walk_forward_fold_count.
+
+9.5 Monitoring subsystem
+- src/monitoring/metrics.py:
+  - Prometheus counters/histograms/gauges for:
+    - request metrics
+    - inference latency
+    - model confidence
+    - signals
+    - order submissions/failures
+    - pnl/drawdown
+    - stale data
+    - news freshness
+    - news count by source
+    - ticker mapping success ratio.
+- runtime refresh helper reads reports/artifacts to populate gauges.
+
+9.6 API integration
+- apps/api/main.py now uses shared monitoring metrics module.
+- /metrics endpoint refreshes operational gauges before scrape.
+
+9.7 Alerts
+- apps/notifier/telegram.py:
+  - notifier skeleton methods for:
+    - critical drawdown
+    - sudden price drop
+    - stale data
+    - model degradation
+    - broker/API failure
+    - severe negative news.
+
+9.8 Grafana skeleton
+- provisioning configs and starter dashboard JSON added.
+- docker-compose updated to mount provisioning directory.
+
+9.9 Tests
+- backtesting engine metrics test
+- evaluation/backtest stage report generation test
+- leakage guard test for configured signal source.
+
+
+------------------------------------------------------------
+10) PIPELINE STAGES CURRENT STATUS
+------------------------------------------------------------
+
+Concrete stage implementations now exist for:
+- download_market_data
+- preprocess_market_data
+- download_news_data
+- preprocess_news_data
+- map_news_to_instruments
+- generate_market_features
+- generate_news_features
+- merge_feature_sets
+- train_base_models
+- train_news_model
+- train_ensemble_model
+- evaluate_models
+- backtest_strategy
+- compare_with_production
+- promote_model
+- publish_artifacts
+- generate_reports
+
+Placeholder/future work:
+- run_retrain_pipeline (orchestration of full DAG execution)
+- broker execution subsystem full implementation
+- production-grade model selection/promotion governance
+- multi-asset backtesting and richer order model.
+
+
+------------------------------------------------------------
+11) MAIN OUTPUT ARTIFACT FLOW
+------------------------------------------------------------
+
+Data flow overview:
+1) Market download:
+   data/raw/market/*
+2) Market preprocess:
+   data/interim/market/*
+3) News download:
+   data/raw/news/items.jsonl
+4) News preprocess:
+   data/interim/news/items.jsonl
+5) News mapping:
+   data/processed/news/mapped_news.parquet
+6) News features:
+   data/processed/news/features/news_features.parquet
+7) Market features:
+   data/processed/market/features/market_features.parquet
+8) Merge/split:
+   data/processed/merged/train.parquet
+   data/processed/merged/validation.parquet
+   data/processed/merged/test.parquet
+9) Model training outputs:
+   models/base/*
+   models/news/*
+   models/ensemble/*
+10) Evaluation and backtest:
+   reports/*.json / reports/*.md
+   artifacts/backtests/*
+11) Comparison/promotion/publish/final:
+   artifacts/comparison/*
+   models/registry/*
+   artifacts/published/*
+   reports/final/*
+
+
+------------------------------------------------------------
+12) KNOWN LIMITS / NEXT ENGINEERING TARGETS
+------------------------------------------------------------
+
+Current implementation is intentionally MVP-oriented and interface-first in several areas:
+- No RL.
+- No live broker execution.
+- No transformer NLP.
+- No full orchestrated run_retrain_pipeline stage yet.
+- Backtesting remains single-asset first with simplified execution model.
+- Monitoring gauges are currently refreshed from local artifacts/reports.
+
+Recommended next targets:
+- full pipeline DAG runner for run_retrain_pipeline
+- richer benchmark and walk-forward fold reports
+- stricter schema versioning and data contracts
+- fuller alertmanager + notifier integration loop
+- model registry promotion policy hardening
+- integration tests for complete end-to-end retrain cycle.
+

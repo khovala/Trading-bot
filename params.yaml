@@ -1,0 +1,90 @@
+global:
+  project_name: moex-sandbox-platform
+  timezone: Europe/Moscow
+  seed: 42
+  trading_mode: sandbox
+  dry_run: true
+  real_trading_enabled: false
+
+data:
+  market:
+    provider: t_invest_sandbox
+    interval: 1min
+    lookback_days: 365
+    instruments:
+      - SBER
+  news:
+    enabled: true
+    sources:
+      - rbc_rss
+      - interfax_rss
+      - cbr_rss
+    language: ru
+    dedup_window_minutes: 240
+    aggregation_bucket_minutes: 60
+
+features:
+  market:
+    schema_version: "v1"
+  news:
+    schema_version: "v1"
+    recency_half_life_minutes: 180
+  merged:
+    join_tolerance_minutes: 5
+    schema_version: "v1"
+
+models:
+  prediction_horizon_minutes: 60
+  confidence_threshold: 0.55
+  agreement_threshold: 0.60
+  weights:
+    tabular_regression: 0.20
+    rnn_regression: 0.20
+    binary_classifier: 0.20
+    multiclass_classifier: 0.20
+    news_model: 0.20
+
+risk:
+  max_position_size_pct: 0.10
+  max_daily_loss_pct: 0.02
+  max_portfolio_exposure_pct: 0.60
+  stale_data_minutes: 15
+  min_confidence: 0.50
+
+backtest:
+  initial_cash_rub: 1000000
+  commission_bps: 5
+  slippage_bps: 5
+  lot_rounding: true
+  delayed_execution_bars: 1
+
+tracking:
+  mlflow:
+    experiment_name: moex-sandbox
+    tracking_uri: http://mlflow:5000
+    artifact_root: artifacts/mlflow
+
+stages:
+  download_market_data:
+    provider: mock
+  preprocess_market_data:
+    interval_minutes: 1
+  download_news_data:
+    limit_per_source: 100
+    feed_urls: {}
+    fail_if_all_sources_failed: true
+  generate_news_features:
+    bucket_minutes: 60
+    source_weights:
+      rbc_rss: 1.0
+      interfax_rss: 1.2
+      cbr_rss: 1.1
+  merge_feature_sets:
+    train_ratio: 0.70
+    validation_ratio: 0.15
+    test_ratio: 0.15
+    bucket_minutes: 60
+    news_lag_buckets: 1
+  backtest_strategy:
+    signal_column: expected_return
+    walk_forward_folds: 3

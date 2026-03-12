@@ -1,0 +1,13 @@
+{
+  "title": "MOEX Sandbox Operations",
+  "panels": [
+    {"title": "PnL", "type": "timeseries", "targets": [{"expr": "strategy_pnl_rub"}]},
+    {"title": "Drawdown", "type": "timeseries", "targets": [{"expr": "strategy_drawdown"}]},
+    {"title": "Signal Counts", "type": "timeseries", "targets": [{"expr": "signal_count_total"}]},
+    {"title": "Model Confidence", "type": "timeseries", "targets": [{"expr": "model_confidence"}]},
+    {"title": "News Freshness", "type": "timeseries", "targets": [{"expr": "news_freshness_seconds"}]},
+    {"title": "Order Failures", "type": "timeseries", "targets": [{"expr": "order_failure_total"}]}
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}
