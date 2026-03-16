@@ -1,0 +1,189 @@
+{
+  "stage": "evaluate_models",
+  "validation_metrics_by_model": {
+    "tabular_regression_baseline": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.006617451204364581,
+      "avg_confidence": 2.8292594555453586e-05,
+      "pnl_proxy": -5.73586504328657
+    },
+    "gru_regression_skeleton": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.006648506538353861,
+      "avg_confidence": 0.014450478514012743,
+      "pnl_proxy": -5.73586504328657
+    },
+    "multiclass_action_classifier": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.006617447430174829,
+      "avg_confidence": 0.3658458360514364,
+      "pnl_proxy": -5.73586504328657
+    },
+    "binary_direction_classifier": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.006617446288403434,
+      "avg_confidence": 0.001051859099803472,
+      "pnl_proxy": -5.73586504328657
+    },
+    "news_feature_model": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.4983384069000507,
+      "mae": 0.006617451367317444,
+      "avg_confidence": 0.0,
+      "pnl_proxy": 0.0
+    },
+    "moirai2_wrapper": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.0066203365627089394,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -5.73586504328657
+    },
+    "chronos2_wrapper": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5022450532724505,
+      "mae": 0.0066174511757545774,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -5.521328581770267
+    },
+    "tft_wrapper": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.006621493437150441,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -5.73586504328657
+    },
+    "timesfm2_wrapper": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.6342846270928463,
+      "mae": 0.00625357528033727,
+      "avg_confidence": 4.6975678594773774e-05,
+      "pnl_proxy": 181.51064883247878
+    },
+    "patchtst_wrapper": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.633650431253171,
+      "mae": 0.0062496909593904625,
+      "avg_confidence": 1.9967754498190715e-05,
+      "pnl_proxy": 181.52998661799492
+    },
+    "timexer_wrapper": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.006619637946003495,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -5.73586504328657
+    },
+    "weighted_ensemble": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.6340182648401826,
+      "mae": 0.006251472942101209,
+      "avg_confidence": 3.34721896467319e-05,
+      "pnl_proxy": 182.02223015759503
+    }
+  },
+  "test_metrics_by_model": {
+    "tabular_regression_baseline": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.003610533212265404,
+      "avg_confidence": 2.8292594555453586e-05,
+      "pnl_proxy": -0.9454524322601424
+    },
+    "gru_regression_skeleton": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.0036503459388487953,
+      "avg_confidence": 0.014450478514012743,
+      "pnl_proxy": -0.9454524322601424
+    },
+    "multiclass_action_classifier": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.003610536655089535,
+      "avg_confidence": 0.3658458360514364,
+      "pnl_proxy": -0.9454524322601424
+    },
+    "binary_direction_classifier": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.0036105376966158315,
+      "avg_confidence": 0.001051859099803472,
+      "pnl_proxy": -0.9454524322601424
+    },
+    "news_feature_model": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.5015157088316993,
+      "mae": 0.003610533063619486,
+      "avg_confidence": 0.0,
+      "pnl_proxy": 0.0
+    },
+    "moirai2_wrapper": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.003615496890838502,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -0.9454524322601424
+    },
+    "chronos2_wrapper": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.5007673672327849,
+      "mae": 0.003610533100314491,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -0.3887379373557245
+    },
+    "tft_wrapper": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.0036170562703886867,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -0.9454524322601424
+    },
+    "timesfm2_wrapper": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.635062974848112,
+      "mae": 0.003258550295052958,
+      "avg_confidence": 2.892071331326772e-05,
+      "pnl_proxy": 101.65779323531983
+    },
+    "patchtst_wrapper": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.6346951459266118,
+      "mae": 0.0032539873549136226,
+      "avg_confidence": 8.288893236889595e-06,
+      "pnl_proxy": 101.39845569889117
+    },
+    "timexer_wrapper": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.00361871511478382,
+      "avg_confidence": 0.0,
+      "pnl_proxy": -0.9454524322601424
+    },
+    "weighted_ensemble": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.6347966159739222,
+      "mae": 0.0032560763480096212,
+      "avg_confidence": 1.8605164684537368e-05,
+      "pnl_proxy": 101.38229283890188
+    }
+  },
+  "ensemble_validation": {
+    "samples": 78840.0,
+    "directional_accuracy": 0.6340182648401826,
+    "mae": 0.006251472942101209,
+    "avg_confidence": 3.34721896467319e-05,
+    "pnl_proxy": 182.02223015759503
+  },
+  "ensemble_test": {
+    "samples": 78841.0,
+    "directional_accuracy": 0.6347966159739222,
+    "mae": 0.0032560763480096212,
+    "avg_confidence": 1.8605164684537368e-05,
+    "pnl_proxy": 101.38229283890188
+  }
+}

@@ -1,5 +1,5 @@
 
-# MOEX Sandbox Trading Platform (Phase 1 Skeleton)
+# MOEX Sandbox Trading Platform (Phase 2 Upgrade)
 
 Modular, sandbox-first architecture for MOEX equity trading with T-Invest API, staged retraining, MLflow tracking, and observability.
 
@@ -101,12 +101,112 @@ params.yaml pipeline.yaml pyproject.toml .env.example README.md
    - `GET /ready`
    - `GET /metrics`
 
-## Phase 1 Scope Guardrails
+## Phase 2 Additions
 
-- No model training implementation
-- No broker integration implementation
-- No backtesting implementation
-- Interfaces and stubs only
+- Added config-driven Stage 2 modeling stack:
+  - `train_news_encoder` for embedding/sentiment features
+  - `train_foundation_models` for Chronos/TimesFM/Moirai/TimeXer/TFT/PatchTST wrappers
+- Added `models_v2` section in `params.yaml`:
+  - `news_encoder` hyperparameters
+  - per-forecaster settings (`enabled`, `prediction_horizon`, `calibration_alpha`, covariates)
+- Baseline stages (`train_base_models`, `train_news_model`, `train_ensemble_model`) remain intact for compatibility.
+
+## Phase 3 Additions
+
+- `train_ensemble_model` upgraded to adaptive weighting:
+  - uses confidence-aware uncertainty penalty
+  - uses expected-return-change turnover penalty
+  - supports dynamic inclusion of foundation model outputs
+- Added ablation diagnostics artifact:
+  - `artifacts/evaluation/ensemble_ablation.json`
+- New config block in `params.yaml`:
+  - `models_v2.ensemble` (`uncertainty_penalty`, `turnover_penalty`, `min_weight`, `foundation_default_weight`)
+
+## Phase 4 Additions
+
+- `evaluate_models` now enriches report metrics with Stage 3 signals from:
+  - `artifacts/evaluation/ensemble_ablation.json`
+- `compare_with_production` now uses:
+  - `evaluation.promotion_criteria` checks
+  - Stage 3 signal thresholds (`min_ablation_positive_ratio`, `max_weight_concentration_hhi`)
+- Decision payload now contains explicit gate breakdown:
+  - `checks.promotion_criteria`
+  - `checks.stage3_signals`
+  - `details` with values used for promotion decision
+
+## Promotion Registry & Bundle
+
+- `promote_model` stores gate reasons in `models/registry/champion.json`
+  - `promotion_checks`
+  - `promotion_details`
+- `publish_artifacts` stores `promotion_summary` in:
+  - `artifacts/published/bundle_manifest.json`
+
+## Phase 5 Additions
+
+- New policy stage:
+  - `train_policy_layer`
+  - output model: `models/policy/offline_policy_layer.pkl`
+  - output summary: `artifacts/evaluation/policy_layer_summary.json`
+- New config section:
+  - `models_v2.policy_layer`
+- `evaluate_models` now reads policy summary metrics.
+- `compare_with_production` now supports policy-related thresholds:
+  - `min_policy_avg_utility`
+  - `max_policy_turnover_proxy`
+
+## Phase 6 Additions
+
+- `backtest_strategy` now supports policy-driven execution:
+  - automatically uses `models/policy/offline_policy_layer.pkl` when available
+  - backtest rows are enriched with policy outputs (`policy_target_position`, `policy_signal`)
+  - engine supports fractional target positions via `target_position_column`
+- New stage parameter:
+  - `stages.backtest_strategy.use_policy_layer` (default `true`)
+- Backtest summary includes policy usage diagnostics:
+  - `policy_backtest_enabled`
+  - `policy_avg_abs_target_position`
+  - `policy_avg_expected_utility`
+
+## Phase 7 Additions
+
+- `evaluate_models` now computes policy execution metrics on validation data:
+  - `policy_hit_ratio`
+  - `policy_utility_adjusted_score`
+  - `policy_turnover_budget_violations`
+  - `policy_turnover_budget_violation_ratio`
+  - `policy_avg_decision_utility`
+- New tuneable settings:
+  - `stages.evaluate_models.turnover_budget_per_step`
+  - `stages.evaluate_models.utility_scale`
+
+## Phase 8 Additions
+
+- Prometheus export now includes offline pipeline outputs automatically via `/metrics`:
+  - full backtest quality set (`strategy_sharpe`, `strategy_sortino`, `strategy_calmar`, etc.)
+  - evaluate/model metrics (`model_directional_accuracy`, `model_mae_proxy`)
+  - policy execution metrics (`policy_hit_ratio`, `policy_utility_adjusted_score`, violation ratio)
+  - ensemble diagnostics and promotion decision flag
+  - pipeline freshness (`pipeline_last_update_unix`) and report count
+- Grafana dashboard `MOEX Sandbox Operations` expanded with panels for these metrics.
+
+## Phase 9 Additions
+
+- Backtest plotting now produces real visual files in addition to JSON:
+  - static PNG charts via matplotlib
+  - interactive HTML charts via plotly
+- Output location:
+  - `artifacts/backtests/plots/`
+- Generated charts:
+  - `equity_vs_benchmark` (`.json`, `.png`, `.html`)
+  - `drawdown_curve` (`.json`, `.png`, `.html`)
+  - `rolling_performance` (`.json`, `.png`, `.html`)
+  - `trade_distribution` (`.json`, `.png`, `.html`)
+
+## Run Stage 2 Only
+
+- `docker compose run --rm trainer python -m apps.trainer.run_stage --stage train_news_encoder`
+- `docker compose run --rm trainer python -m apps.trainer.run_stage --stage train_foundation_models`
 
 # Trading-bot
 ML for finances (OTUS course)

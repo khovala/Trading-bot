@@ -1,0 +1,14 @@
+{
+  "run_id": "96b3d0a8-3e67-4ab8-ab2a-453057d79c6d",
+  "stage_name": "download_market_data",
+  "success": true,
+  "metrics": {
+    "instrument_count": 1.0,
+    "ticker_count": 1.0,
+    "candle_count": 525601.0
+  },
+  "artifacts": [
+    "data/raw/market/instruments.json",
+    "data/raw/market/candles"
+  ]
+}

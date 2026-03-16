@@ -58,6 +58,20 @@ stages:
     reports: [reports/merge_feature_sets.json]
     mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
 
+  train_news_encoder:
+    purpose: Build embedding/sentiment representation for modern news pipeline.
+    deps: [data/interim/news, params.yaml]
+    outs: [data/processed/news/features/news_embeddings.parquet, models/news_v2]
+    reports: [reports/train_news_encoder.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  train_foundation_models:
+    purpose: Train config-driven foundation/deep sequence forecasters.
+    deps: [data/processed/merged, data/processed/news/features/news_embeddings.parquet, params.yaml]
+    outs: [models/foundation]
+    reports: [reports/train_foundation_models.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
   train_base_models:
     purpose: Train baseline market-only models.
     deps: [data/processed/merged, params.yaml]
@@ -73,22 +87,36 @@ stages:
     mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
 
   train_ensemble_model:
-    purpose: Train weighted ensemble/meta placeholder.
-    deps: [models/base, models/news, params.yaml]
+    purpose: Train adaptive weighted ensemble/meta placeholder with ablation diagnostics.
+    deps: [models/base, models/news, models/foundation, params.yaml]
     outs: [models/ensemble]
     reports: [reports/train_ensemble_model.json]
     mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
 
+  train_policy_layer:
+    purpose: Train offline policy layer with risk/turnover/uncertainty-aware utility.
+    deps: [models/ensemble, data/processed/merged, params.yaml]
+    outs: [models/policy, artifacts/evaluation/policy_layer_summary.json]
+    reports: [reports/train_policy_layer.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
+  tune_policy_backtest:
+    purpose: Grid-search policy and backtest parameters to improve risk-adjusted pnl.
+    deps: [models/ensemble, models/policy, data/processed/merged, params.yaml]
+    outs: [artifacts/evaluation/policy_tuning_grid.json, artifacts/evaluation/policy_tuning_best.json, artifacts/evaluation/policy_tuning_recommendations.json]
+    reports: [reports/tune_policy_backtest.json]
+    mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
+
   evaluate_models:
     purpose: Evaluate holdout metrics and calibration.
-    deps: [models/ensemble, data/processed/merged, params.yaml]
+    deps: [models/ensemble, models/policy, artifacts/evaluation/policy_tuning_best.json, data/processed/merged, params.yaml]
     outs: [artifacts/evaluation]
     reports: [reports/evaluate_models.json, reports/evaluate_models.md]
     mlflow: {log_params: true, log_metrics: true, log_artifacts: true}
 
   backtest_strategy:
     purpose: Run walk-forward backtest with realistic assumptions.
-    deps: [models/ensemble, data/processed/merged, params.yaml]
+    deps: [models/ensemble, models/policy, data/processed/merged, params.yaml]
     outs: [artifacts/backtests]
     reports: [reports/backtest_strategy.json, reports/backtest_strategy.md]
     mlflow: {log_params: true, log_metrics: true, log_artifacts: true}

@@ -1,0 +1,11 @@
+{
+  "run_id": "a7b0e3cc-b79d-4fbc-b557-618e6c12c731",
+  "stage_name": "train_news_model",
+  "success": true,
+  "metrics": {
+    "news_train_rows": 32.0
+  },
+  "artifacts": [
+    "models/news"
+  ]
+}

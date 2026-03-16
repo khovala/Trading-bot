@@ -61,3 +61,27 @@ def test_weighted_ensemble_handles_negative_weights() -> None:
     assert metrics["weight_count"] == 2.0
     assert ensemble.weights["a"] == 0.5
     assert ensemble.weights["b"] == 0.5
+
+
+def test_weighted_ensemble_adaptive_reweighting_updates_diagnostics() -> None:
+    rows = _rows()
+    tab = TabularRegressionBaseline()
+    news = NewsFeatureModel()
+    tab.fit(rows)
+    news.fit(rows)
+    preds = {
+        tab.model_name: tab.predict(rows),
+        news.model_name: news.predict(rows),
+    }
+    ensemble = WeightedEnsembleModel(
+        weights={tab.model_name: 0.5, news.model_name: 0.5},
+        uncertainty_penalty=0.3,
+        turnover_penalty=0.1,
+    )
+
+    metrics = ensemble.fit(rows, predictions_by_model=preds)
+
+    assert metrics["weight_count"] == 2.0
+    assert abs(sum(ensemble.weights.values()) - 1.0) < 1e-9
+    assert "model_stats" in ensemble.diagnostics
+    assert tab.model_name in ensemble.diagnostics["model_stats"]

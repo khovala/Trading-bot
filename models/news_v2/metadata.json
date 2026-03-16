@@ -1,0 +1,14 @@
+{
+  "run_id": "bb90f9c9-cd3f-4a40-9e3c-ef199e66f317",
+  "encoder": {
+    "encoder_name": "hashing_tfidf_v1",
+    "embedding_dim": 16,
+    "half_life_minutes": 180.0,
+    "min_tokens": 3,
+    "relevance_threshold": 0.01,
+    "fitted_samples": 0,
+    "average_sentiment": 0.0,
+    "average_relevance": 0.0,
+    "latest_timestamp": ""
+  }
+}

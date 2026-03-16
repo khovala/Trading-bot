@@ -1,0 +1,15 @@
+{
+  "run_id": "f4619659-fd8b-4b3c-8893-24d5503e6940",
+  "stage_name": "download_news_data",
+  "success": true,
+  "metrics": {
+    "raw_item_count": 155.0,
+    "deduped_item_count": 153.0,
+    "dedup_removed": 2.0,
+    "source_error_count": 0.0,
+    "source_count": 3.0
+  },
+  "artifacts": [
+    "data/raw/news/items.jsonl"
+  ]
+}

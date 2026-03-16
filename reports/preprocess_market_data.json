@@ -1,0 +1,15 @@
+{
+  "run_id": "d6f9922f-fe80-4ca9-82da-c74049613da6",
+  "stage_name": "preprocess_market_data",
+  "success": true,
+  "metrics": {
+    "instrument_count": 1.0,
+    "ticker_count": 1.0,
+    "duplicate_bar_count": 0.0,
+    "missing_bar_count": 0.0
+  },
+  "artifacts": [
+    "data/interim/market/instruments.json",
+    "data/interim/market/candles"
+  ]
+}

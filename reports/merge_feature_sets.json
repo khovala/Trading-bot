@@ -1,0 +1,18 @@
+{
+  "run_id": "3ae5f9cb-4062-4f46-83f9-688168954458",
+  "stage_name": "merge_feature_sets",
+  "success": true,
+  "metrics": {
+    "merged_row_count": 525601.0,
+    "train_row_count": 367920.0,
+    "validation_row_count": 78840.0,
+    "test_row_count": 78841.0,
+    "merge_bucket_minutes": 60.0,
+    "news_lag_buckets": 1.0
+  },
+  "artifacts": [
+    "data/processed/merged/train.parquet",
+    "data/processed/merged/validation.parquet",
+    "data/processed/merged/test.parquet"
+  ]
+}

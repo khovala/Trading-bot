@@ -1,0 +1,15 @@
+{
+  "run_id": "88e46dd8-4d91-4757-a984-411707937419",
+  "stage_name": "train_ensemble_model",
+  "success": true,
+  "metrics": {
+    "ensemble_models": 2.0,
+    "ensemble_component_models": 2.0,
+    "ensemble_adaptive_weight_count": 2.0,
+    "ensemble_fit_rows_used": 120000.0
+  },
+  "artifacts": [
+    "models/ensemble",
+    "artifacts/evaluation/ensemble_ablation.json"
+  ]
+}

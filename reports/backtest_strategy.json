@@ -1,0 +1,40 @@
+{
+  "run_id": "8c8b801e-e125-44ce-86b4-6f562abd72f0",
+  "stage_name": "backtest_strategy",
+  "success": true,
+  "metrics": {
+    "pnl": -22826.91417278652,
+    "drawdown": 0.0228443523241721,
+    "sharpe": -0.21082644520062724,
+    "sortino": -0.21256734678016828,
+    "calmar": -0.9992366537191266,
+    "hit_ratio": 0.49806791087725066,
+    "turnover": 30681521.67838201,
+    "exposure": 0.004163425613312576,
+    "ablation_pnl_delta_with_minus_without_news": 0.0,
+    "policy_backtest_enabled": 1.0,
+    "policy_avg_abs_target_position": 0.41652799106369637,
+    "policy_avg_expected_utility": -0.37476648722133293,
+    "walk_forward_sharpe_mean": -0.2405423233086926,
+    "walk_forward_fold_count": 3.0
+  },
+  "artifacts": [
+    "artifacts/backtests/backtest_summary.json",
+    "artifacts/backtests/equity_curve.json",
+    "artifacts/backtests/trade_log.json",
+    "artifacts/backtests/plots/equity_vs_benchmark.json",
+    "artifacts/backtests/plots/drawdown_curve.json",
+    "artifacts/backtests/plots/rolling_performance.json",
+    "artifacts/backtests/plots/trade_distribution.json",
+    "artifacts/backtests/plots/equity_vs_benchmark.png",
+    "artifacts/backtests/plots/equity_vs_benchmark.html",
+    "artifacts/backtests/plots/drawdown_curve.png",
+    "artifacts/backtests/plots/drawdown_curve.html",
+    "artifacts/backtests/plots/rolling_performance.png",
+    "artifacts/backtests/plots/rolling_performance.html",
+    "artifacts/backtests/plots/trade_distribution.png",
+    "artifacts/backtests/plots/trade_distribution.html",
+    "reports/backtest_strategy.json",
+    "reports/backtest_strategy.md"
+  ]
+}

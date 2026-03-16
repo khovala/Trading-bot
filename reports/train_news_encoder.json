@@ -1,0 +1,13 @@
+{
+  "run_id": "bb90f9c9-cd3f-4a40-9e3c-ef199e66f317",
+  "stage_name": "train_news_encoder",
+  "success": true,
+  "metrics": {
+    "encoded_news_rows": 0.0,
+    "news_input_rows": 153.0
+  },
+  "artifacts": [
+    "data/processed/news/features/news_embeddings.parquet",
+    "models/news_v2/metadata.json"
+  ]
+}

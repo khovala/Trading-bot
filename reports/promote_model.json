@@ -1,0 +1,12 @@
+{
+  "run_id": "efe361bf-c964-43e8-afbb-46ae599c45b8",
+  "stage_name": "promote_model",
+  "success": true,
+  "metrics": {
+    "promoted": 0.0
+  },
+  "artifacts": [
+    "models/registry/champion.json",
+    "reports/promote_model.json"
+  ]
+}

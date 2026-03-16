@@ -1,0 +1,9 @@
+{
+  "run_id": "ee8a773e-fe64-4a06-93c1-9236aceb17a7",
+  "trained_models": [
+    "tabular_regression_baseline",
+    "gru_regression_skeleton",
+    "binary_direction_classifier",
+    "multiclass_action_classifier"
+  ]
+}

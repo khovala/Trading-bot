@@ -56,3 +56,4 @@ def test_training_stages_write_serialized_artifacts(tmp_path: Path) -> None:
     assert (tmp_path / "models/base/tabular_regression_baseline.pkl").exists()
     assert (tmp_path / "models/news/news_feature_model.pkl").exists()
     assert (tmp_path / "models/ensemble/weighted_ensemble.pkl").exists()
+    assert (tmp_path / "artifacts/evaluation/ensemble_ablation.json").exists()

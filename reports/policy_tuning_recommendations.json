@@ -1,0 +1,16 @@
+{
+  "run_id": "c4d3a890-059c-4559-a011-f1f04f8e767c",
+  "stage_name": "tune_policy_backtest",
+  "success": true,
+  "metrics": {
+    "candidate_count": 180.0,
+    "best_pnl": -22826.91417278652,
+    "best_sharpe": -0.21082644520062724,
+    "best_drawdown": 0.0228443523241721
+  },
+  "artifacts": [
+    "artifacts/evaluation/policy_tuning_grid.json",
+    "artifacts/evaluation/policy_tuning_best.json",
+    "reports/policy_tuning_recommendations.json"
+  ]
+}

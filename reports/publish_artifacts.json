@@ -1,0 +1,12 @@
+{
+  "run_id": "d2ad6eea-2cf5-4d5b-9432-ab0e2ec0bd97",
+  "stage_name": "publish_artifacts",
+  "success": true,
+  "metrics": {
+    "artifact_count": 7.0
+  },
+  "artifacts": [
+    "artifacts/published/bundle_manifest.json",
+    "reports/publish_artifacts.json"
+  ]
+}

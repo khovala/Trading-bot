@@ -1,0 +1,12 @@
+{
+  "run_id": "c15472f2-9516-41ef-9d53-7054ee92dfc3",
+  "stage_name": "generate_reports",
+  "success": true,
+  "metrics": {
+    "report_count": 5.0
+  },
+  "artifacts": [
+    "reports/final/retrain_report.json",
+    "reports/final/retrain_report.md"
+  ]
+}

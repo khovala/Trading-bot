@@ -1,0 +1,18 @@
+{
+  "run_id": "d9fd76d1-de43-454a-8073-15daa6c1687d",
+  "stage_name": "compare_with_production",
+  "success": true,
+  "metrics": {
+    "candidate_sharpe": -0.4974348118274303,
+    "candidate_directional_accuracy": 0.6340182648401826,
+    "ablation_positive_ratio": 0.5,
+    "ensemble_weight_concentration_hhi": 0.5000000006136968,
+    "policy_avg_utility": -0.1991872963607743,
+    "policy_avg_turnover_proxy": 0.08121351140705571,
+    "promotion_checks_passed": 0.0
+  },
+  "artifacts": [
+    "reports/compare_with_production.json",
+    "artifacts/comparison/decision.json"
+  ]
+}

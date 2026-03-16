@@ -1,0 +1,13 @@
+{
+  "run_id": "6bdf65f8-a298-4d8a-91fe-d589e9858006",
+  "stage_name": "generate_news_features",
+  "success": true,
+  "metrics": {
+    "mapped_row_count": 153.0,
+    "feature_row_count": 32.0,
+    "bucket_minutes": 60.0
+  },
+  "artifacts": [
+    "data/processed/news/features/news_features.parquet"
+  ]
+}

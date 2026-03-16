@@ -15,6 +15,7 @@ class BacktestConfig:
     signal_threshold: float = 0.0
     position_size_pct: float = 0.2
     signal_column: str = "expected_return"
+    target_position_column: str | None = None
 
 
 def _signal_from_row(row: dict[str, Any], threshold: float, signal_column: str) -> int:
@@ -31,6 +32,18 @@ def _signal_from_row(row: dict[str, Any], threshold: float, signal_column: str) 
     return 0
 
 
+def _target_position_from_row(row: dict[str, Any], target_position_column: str | None) -> float | None:
+    if not target_position_column:
+        return None
+    if target_position_column not in row:
+        return None
+    try:
+        value = float(row.get(target_position_column, 0.0))
+    except Exception:
+        return None
+    return max(-1.0, min(1.0, value))
+
+
 def run_backtest(rows: list[dict[str, Any]], cfg: BacktestConfig) -> dict[str, Any]:
     if not rows:
         return {
@@ -43,7 +56,7 @@ def run_backtest(rows: list[dict[str, Any]], cfg: BacktestConfig) -> dict[str, A
 
     cash = cfg.initial_cash
     position = 0
-    pending_signal: tuple[int, int] | None = None
+    pending_signal: tuple[float, int] | None = None
     trade_log: list[dict[str, Any]] = []
     equity_curve: list[dict[str, Any]] = []
     turnover = 0.0
@@ -52,14 +65,19 @@ def run_backtest(rows: list[dict[str, Any]], cfg: BacktestConfig) -> dict[str, A
     for i, row in enumerate(ordered):
         ts = str(row["timestamp"])
         price = float(row["close"])
+        target_position = _target_position_from_row(row, cfg.target_position_column)
         signal = _signal_from_row(row, cfg.signal_threshold, cfg.signal_column)
-        if pending_signal is None and signal != 0:
-            pending_signal = (signal, i + cfg.execution_delay_bars)
+        if pending_signal is None:
+            if target_position is not None:
+                pending_signal = (target_position, i + cfg.execution_delay_bars)
+            elif signal != 0:
+                pending_signal = (float(signal), i + cfg.execution_delay_bars)
 
         if pending_signal and i >= pending_signal[1]:
-            exec_signal = pending_signal[0]
+            exec_signal = float(pending_signal[0])
             pending_signal = None
-            target_notional = max(0.0, cash * cfg.position_size_pct)
+            signal_scale = abs(exec_signal) if cfg.target_position_column else 1.0
+            target_notional = max(0.0, cash * cfg.position_size_pct * signal_scale)
             raw_qty = int(target_notional / max(1e-9, price))
             qty = max(0, (raw_qty // max(1, cfg.lot_size)) * max(1, cfg.lot_size))
             if exec_signal < 0:

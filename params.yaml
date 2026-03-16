@@ -44,6 +44,91 @@ models:
     multiclass_classifier: 0.20
     news_model: 0.20
 
+models_v2:
+  news_encoder:
+    encoder_name: hashing_tfidf_v1
+    embedding_dim: 16
+    half_life_minutes: 180
+    min_tokens: 3
+    relevance_threshold: 0.01
+  foundation_forecasters:
+    - type: chronos2
+      enabled: true
+      prediction_horizon: 60m
+      model_version: v2
+      calibration_alpha: 0.15
+      expected_return_scale: 1.00
+      backend_model_id: amazon/chronos-t5-small
+      backend_context_length: 128
+      backend_prediction_length: 1
+      backend_num_samples: 20
+      backend_stride: 64
+      backend_max_predict_rows: 5000
+      covariate_columns:
+        - rolling_volatility_20
+        - momentum_10
+        - volume_ratio_20
+        - news_weighted_sentiment_mean
+    - type: timesfm2
+      enabled: true
+      prediction_horizon: 60m
+      model_version: v2
+      calibration_alpha: 0.10
+      expected_return_scale: 1.00
+      covariate_columns:
+        - return_1
+        - rolling_volatility_20
+        - zscore_20
+    - type: moirai2
+      enabled: true
+      prediction_horizon: 60m
+      model_version: v2
+      calibration_alpha: 0.08
+      expected_return_scale: 1.00
+      covariate_columns:
+        - macd
+        - macd_signal
+        - atr_14
+        - news_recency_weighted_sentiment
+    - type: timexer
+      enabled: true
+      prediction_horizon: 60m
+      model_version: v1
+      calibration_alpha: 0.12
+      expected_return_scale: 1.00
+    - type: tft
+      enabled: true
+      prediction_horizon: 60m
+      model_version: v1
+      calibration_alpha: 0.09
+      expected_return_scale: 1.00
+    - type: patchtst
+      enabled: true
+      prediction_horizon: 60m
+      model_version: v1
+      calibration_alpha: 0.07
+      expected_return_scale: 1.00
+  ensemble:
+    uncertainty_penalty: 0.25
+    turnover_penalty: 0.10
+    min_weight: 0.02
+    foundation_default_weight: 0.05
+    max_fit_rows: 120000
+    selection_enabled: true
+    top_k_models: 3
+    require_positive_pnl_proxy: true
+    min_directional_accuracy: 0.50
+  policy_layer:
+    risk_aversion: 3.0
+    turnover_penalty: 0.25
+    drawdown_penalty: 0.20
+    uncertainty_penalty: 0.35
+    max_position: 1.0
+    min_confidence: 0.0
+    signal_deadband: 0.0
+    max_turnover_step: 0.05
+    signal_to_position_scale: 750.0
+
 risk:
   max_position_size_pct: 0.10
   max_daily_loss_pct: 0.02
@@ -57,12 +142,39 @@ backtest:
   slippage_bps: 5
   lot_rounding: true
   delayed_execution_bars: 1
+  signal_threshold: 0.0
+  position_size_pct: 0.01
 
 tracking:
   mlflow:
     experiment_name: moex-sandbox
     tracking_uri: http://mlflow:5000
     artifact_root: artifacts/mlflow
+
+evaluation:
+  protocol:
+    walk_forward_folds: 5
+    purged_cv_enabled: true
+    embargo_minutes: 60
+    regime_wise_evaluation: true
+    stress_cost_multipliers: [1.0, 1.5, 2.0]
+    stress_slippage_multipliers: [1.0, 1.5, 2.0]
+  promotion_criteria:
+    walk_forward_sharpe_mean_min: 1.0
+    max_drawdown_max: 0.15
+    min_positive_folds_ratio: 0.5
+    min_turnover_reduction_vs_baseline: 0.5
+    require_news_ablation_benefit: false
+    require_cost_stress_pass: true
+    require_calibration_report: true
+    require_leakage_checks: true
+
+universe:
+  mode: focused
+  instruments:
+    - SBER
+  trading_horizons_minutes:
+    - 60
 
 stages:
   download_market_data:
@@ -85,6 +197,30 @@ stages:
     test_ratio: 0.15
     bucket_minutes: 60
     news_lag_buckets: 1
+  train_news_encoder:
+    enabled: true
+  train_foundation_models:
+    enabled: true
+  train_policy_layer:
+    enabled: true
+  tune_policy_backtest:
+    max_candidates: 180
+    min_confidence_grid: [0.0, 0.05, 0.1, 0.2]
+    signal_deadband_grid: [0.0, 0.00005, 0.0001, 0.0002]
+    max_turnover_step_grid: [0.05, 0.1, 0.2]
+    signal_to_position_scale_grid: [200.0, 350.0, 500.0, 750.0]
+    backtest_position_size_pct_grid: [0.01, 0.02, 0.03, 0.05]
+    backtest_signal_threshold_grid: [0.0, 0.00005, 0.0001, 0.0002]
+  evaluate_models:
+    turnover_budget_per_step: 0.25
+    utility_scale: 100.0
   backtest_strategy:
     signal_column: expected_return
     walk_forward_folds: 3
+    use_policy_layer: true
+  compare_with_production:
+    promotion_sharpe_threshold: 0.0
+    min_ablation_positive_ratio: 0.0
+    max_weight_concentration_hhi: 1.0
+    min_policy_avg_utility: -1000000.0
+    max_policy_turnover_proxy: 1000000.0

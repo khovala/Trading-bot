@@ -1,0 +1,73 @@
+{
+  "run_id": "88e46dd8-4d91-4757-a984-411707937419",
+  "trained_models": [
+    "weighted_ensemble",
+    "stacking_meta_placeholder"
+  ],
+  "ensemble_component_models": [
+    "patchtst_wrapper",
+    "timesfm2_wrapper"
+  ],
+  "quality_proxy_by_model": {
+    "tabular_regression_baseline": {
+      "directional_accuracy": 0.5006583333333333,
+      "pnl_proxy": -0.14496648762548736
+    },
+    "gru_regression_skeleton": {
+      "directional_accuracy": 0.5006583333333333,
+      "pnl_proxy": -0.14496648762548736
+    },
+    "binary_direction_classifier": {
+      "directional_accuracy": 0.5006583333333333,
+      "pnl_proxy": -0.14496648762548736
+    },
+    "multiclass_action_classifier": {
+      "directional_accuracy": 0.5006583333333333,
+      "pnl_proxy": -0.14496648762548736
+    },
+    "news_feature_model": {
+      "directional_accuracy": 0.4993416666666667,
+      "pnl_proxy": 0.0
+    },
+    "moirai2_wrapper": {
+      "directional_accuracy": 0.5006583333333333,
+      "pnl_proxy": -0.14496648762548736
+    },
+    "chronos2_wrapper": {
+      "directional_accuracy": 0.500725,
+      "pnl_proxy": -0.07746310170217618
+    },
+    "tft_wrapper": {
+      "directional_accuracy": 0.5006583333333333,
+      "pnl_proxy": -0.14496648762548736
+    },
+    "timesfm2_wrapper": {
+      "directional_accuracy": 0.6359166666666667,
+      "pnl_proxy": 80.3737551886161
+    },
+    "patchtst_wrapper": {
+      "directional_accuracy": 0.63575,
+      "pnl_proxy": 80.34916055818879
+    },
+    "timexer_wrapper": {
+      "directional_accuracy": 0.5006583333333333,
+      "pnl_proxy": -0.14496648762548736
+    }
+  },
+  "ensemble_selection": {
+    "selection_enabled": true,
+    "top_k_models": 3,
+    "require_positive_pnl_proxy": true,
+    "min_directional_accuracy": 0.5,
+    "selected_models": [
+      "timesfm2_wrapper",
+      "patchtst_wrapper"
+    ]
+  },
+  "adaptive_weighting": {
+    "uncertainty_penalty": 0.25,
+    "turnover_penalty": 0.1,
+    "min_weight": 0.02,
+    "max_fit_rows": 120000
+  }
+}

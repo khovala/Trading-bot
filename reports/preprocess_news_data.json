@@ -1,0 +1,13 @@
+{
+  "run_id": "5aad8447-f4ff-44d3-be71-47e5f322d872",
+  "stage_name": "preprocess_news_data",
+  "success": true,
+  "metrics": {
+    "input_item_count": 153.0,
+    "deduped_item_count": 153.0,
+    "processed_item_count": 153.0
+  },
+  "artifacts": [
+    "data/interim/news/items.jsonl"
+  ]
+}
