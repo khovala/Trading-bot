@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68", "wheel", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,7 +19,8 @@ dependencies = [
   "pyarrow>=17.0.0",
   "matplotlib",
   "plotly",
-  "chronos-forecasting",
+  "lightgbm>=4.0.0",
+  "scikit-learn>=1.5.0",
 ]
 
 [project.optional-dependencies]

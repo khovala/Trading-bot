@@ -1,10 +1,10 @@
 {
-  "run_id": "d6f9922f-fe80-4ca9-82da-c74049613da6",
+  "run_id": "cb2cd9f5-bb05-498a-8664-250021de3dc9",
   "stage_name": "preprocess_market_data",
   "success": true,
   "metrics": {
-    "instrument_count": 1.0,
-    "ticker_count": 1.0,
+    "instrument_count": 10.0,
+    "ticker_count": 10.0,
     "duplicate_bar_count": 0.0,
     "missing_bar_count": 0.0
   },

@@ -77,6 +77,11 @@ class OfflinePolicyLayer:
             signal = _safe_float(row.get("expected_return", row.get("momentum_10", 0.0)))
             if abs(signal) < self.signal_deadband:
                 signal = 0.0
+            
+            mean_rev_signal = _safe_float(row.get("mean_reversion_direction", 0.0))
+            if mean_rev_signal != 0.0 and _safe_float(row.get("mean_reversion_signal", 0.0)) > 0.0:
+                signal = mean_rev_signal * 0.5 + signal * 0.5
+            
             confidence = clip01(_safe_float(row.get("confidence", row.get("confidence_proxy", self.avg_confidence or 0.5))))
             uncertainty = 1.0 - confidence
             drawdown_proxy = max(0.0, _safe_float(row.get("rolling_volatility_20", self.avg_volatility)))

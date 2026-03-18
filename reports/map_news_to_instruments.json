@@ -1,12 +1,12 @@
 {
-  "run_id": "a1696e99-4fe5-4914-ad19-38edf7f5b31e",
+  "run_id": "746a332a-e18a-43ff-8582-c03702c32d2f",
   "stage_name": "map_news_to_instruments",
   "success": true,
   "metrics": {
     "input_item_count": 153.0,
     "mapped_item_count": 153.0,
-    "unmapped_item_count": 112.0,
-    "mapping_success_ratio": 0.2679738562091503
+    "unmapped_item_count": 104.0,
+    "mapping_success_ratio": 0.3202614379084967
   },
   "artifacts": [
     "data/processed/news/mapped_news.parquet"

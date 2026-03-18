@@ -1,5 +1,5 @@
 # Stage Report
 
-- run_id: `8c8b801e-e125-44ce-86b4-6f562abd72f0`
+- run_id: `dfa333ab-7beb-4d6c-a8a2-0fc25d388f56`
 - stage: `backtest_strategy`
 - success: `True`

@@ -1,12 +1,12 @@
 {
-  "run_id": "3ae5f9cb-4062-4f46-83f9-688168954458",
+  "run_id": "930f1aa2-af0c-457a-a706-138fd4577c81",
   "stage_name": "merge_feature_sets",
   "success": true,
   "metrics": {
-    "merged_row_count": 525601.0,
-    "train_row_count": 367920.0,
-    "validation_row_count": 78840.0,
-    "test_row_count": 78841.0,
+    "merged_row_count": 432010.0,
+    "train_row_count": 302400.0,
+    "validation_row_count": 64800.0,
+    "test_row_count": 64810.0,
     "merge_bucket_minutes": 60.0,
     "news_lag_buckets": 1.0
   },

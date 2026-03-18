@@ -15,6 +15,13 @@
       "avg_confidence": 0.014450478514012743,
       "pnl_proxy": -5.73586504328657
     },
+    "lightgbm_regression": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.7672374429223744,
+      "mae": 0.005819611931645518,
+      "avg_confidence": 0.06234134565834567,
+      "pnl_proxy": 355.2271339350303
+    },
     "multiclass_action_classifier": {
       "samples": 78840.0,
       "directional_accuracy": 0.5016615930999493,
@@ -27,6 +34,13 @@
       "directional_accuracy": 0.5016615930999493,
       "mae": 0.006617446288403434,
       "avg_confidence": 0.001051859099803472,
+      "pnl_proxy": -5.73586504328657
+    },
+    "lstm_regression": {
+      "samples": 78840.0,
+      "directional_accuracy": 0.5016615930999493,
+      "mae": 0.006617451204364581,
+      "avg_confidence": 2.4517558374433626e-06,
       "pnl_proxy": -5.73586504328657
     },
     "news_feature_model": {
@@ -42,13 +56,6 @@
       "mae": 0.0066203365627089394,
       "avg_confidence": 0.0,
       "pnl_proxy": -5.73586504328657
-    },
-    "chronos2_wrapper": {
-      "samples": 78840.0,
-      "directional_accuracy": 0.5022450532724505,
-      "mae": 0.0066174511757545774,
-      "avg_confidence": 0.0,
-      "pnl_proxy": -5.521328581770267
     },
     "tft_wrapper": {
       "samples": 78840.0,
@@ -80,10 +87,10 @@
     },
     "weighted_ensemble": {
       "samples": 78840.0,
-      "directional_accuracy": 0.6340182648401826,
-      "mae": 0.006251472942101209,
-      "avg_confidence": 3.34721896467319e-05,
-      "pnl_proxy": 182.02223015759503
+      "directional_accuracy": 0.7666666666666667,
+      "mae": 0.006272492642138281,
+      "avg_confidence": 0.025043565505067526,
+      "pnl_proxy": 354.1091907775412
     }
   },
   "test_metrics_by_model": {
@@ -101,6 +108,13 @@
       "avg_confidence": 0.014450478514012743,
       "pnl_proxy": -0.9454524322601424
     },
+    "lightgbm_regression": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.7666062074301442,
+      "mae": 0.0028312632102532724,
+      "avg_confidence": 0.06268326881586626,
+      "pnl_proxy": 196.01702934372184
+    },
     "multiclass_action_classifier": {
       "samples": 78841.0,
       "directional_accuracy": 0.49848429116830073,
@@ -115,12 +129,19 @@
       "avg_confidence": 0.001051859099803472,
       "pnl_proxy": -0.9454524322601424
     },
+    "lstm_regression": {
+      "samples": 78841.0,
+      "directional_accuracy": 0.49848429116830073,
+      "mae": 0.003610533212265404,
+      "avg_confidence": 2.451755837443362e-06,
+      "pnl_proxy": -0.9454524322601424
+    },
     "news_feature_model": {
       "samples": 78841.0,
       "directional_accuracy": 0.5015157088316993,
-      "mae": 0.003610533063619486,
-      "avg_confidence": 0.0,
-      "pnl_proxy": 0.0
+      "mae": 0.003988907882330533,
+      "avg_confidence": 0.00038051267741403584,
+      "pnl_proxy": 0.021599453357265097
     },
     "moirai2_wrapper": {
       "samples": 78841.0,
@@ -128,13 +149,6 @@
       "mae": 0.003615496890838502,
       "avg_confidence": 0.0,
       "pnl_proxy": -0.9454524322601424
-    },
-    "chronos2_wrapper": {
-      "samples": 78841.0,
-      "directional_accuracy": 0.5007673672327849,
-      "mae": 0.003610533100314491,
-      "avg_confidence": 0.0,
-      "pnl_proxy": -0.3887379373557245
     },
     "tft_wrapper": {
       "samples": 78841.0,
@@ -166,24 +180,24 @@
     },
     "weighted_ensemble": {
       "samples": 78841.0,
-      "directional_accuracy": 0.6347966159739222,
-      "mae": 0.0032560763480096212,
-      "avg_confidence": 1.8605164684537368e-05,
-      "pnl_proxy": 101.38229283890188
+      "directional_accuracy": 0.7667964637688512,
+      "mae": 0.0033247678239131514,
+      "avg_confidence": 0.025237353525285326,
+      "pnl_proxy": 196.04273431487917
     }
   },
   "ensemble_validation": {
     "samples": 78840.0,
-    "directional_accuracy": 0.6340182648401826,
-    "mae": 0.006251472942101209,
-    "avg_confidence": 3.34721896467319e-05,
-    "pnl_proxy": 182.02223015759503
+    "directional_accuracy": 0.7666666666666667,
+    "mae": 0.006272492642138281,
+    "avg_confidence": 0.025043565505067526,
+    "pnl_proxy": 354.1091907775412
   },
   "ensemble_test": {
     "samples": 78841.0,
-    "directional_accuracy": 0.6347966159739222,
-    "mae": 0.0032560763480096212,
-    "avg_confidence": 1.8605164684537368e-05,
-    "pnl_proxy": 101.38229283890188
+    "directional_accuracy": 0.7667964637688512,
+    "mae": 0.0033247678239131514,
+    "avg_confidence": 0.025237353525285326,
+    "pnl_proxy": 196.04273431487917
   }
 }

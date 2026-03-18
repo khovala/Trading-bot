@@ -1,11 +1,11 @@
 {
-  "run_id": "96b3d0a8-3e67-4ab8-ab2a-453057d79c6d",
+  "run_id": "d7ccd9c9-dc87-46da-a44f-f8c542e7d563",
   "stage_name": "download_market_data",
   "success": true,
   "metrics": {
-    "instrument_count": 1.0,
-    "ticker_count": 1.0,
-    "candle_count": 525601.0
+    "instrument_count": 10.0,
+    "ticker_count": 10.0,
+    "candle_count": 432010.0
   },
   "artifacts": [
     "data/raw/market/instruments.json",

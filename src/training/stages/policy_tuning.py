@@ -118,6 +118,8 @@ class TunePolicyBacktestStage(PipelineStage):
                 position_size_pct=float(candidate.backtest_position_size_pct),
                 signal_column="policy_signal",
                 target_position_column="policy_target_position",
+                stop_loss_pct=bt_cfg.get("stop_loss_pct"),
+                take_profit_pct=bt_cfg.get("take_profit_pct"),
             )
             bt = run_backtest(eval_rows, cfg)
             metrics = compute_backtest_metrics(

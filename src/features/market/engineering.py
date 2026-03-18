@@ -33,6 +33,10 @@ def generate_market_features(candles_by_ticker: dict[str, list[CandleRecord]]) -
         alpha26 = 2.0 / (26 + 1)
         alpha9 = 2.0 / (9 + 1)
 
+        prev_return_1 = 0.0
+        prev_volatility = 0.0
+        prev_rsi = 50.0
+
         for i, candle in enumerate(candles):
             close = closes[i]
             prev_close = closes[i - 1] if i > 0 else close
@@ -71,6 +75,13 @@ def generate_market_features(candles_by_ticker: dict[str, list[CandleRecord]]) -
             close_mean = _mean(win_closes)
             close_std = _std(win_closes)
             zscore = (close - close_mean) / close_std if close_std > 0 else 0.0
+            
+            bb_upper = close_mean + 2 * close_std
+            bb_lower = close_mean - 2 * close_std
+            bb_position = (close - bb_lower) / (bb_upper - bb_lower) if bb_upper > bb_lower else 0.5
+            
+            mean_reversion_signal = 1.0 if abs(zscore) > 2.0 else (0.5 if abs(zscore) > 1.5 else 0.0)
+            mean_reversion_direction = -1.0 if zscore > 1.5 else (1.0 if zscore < -1.5 else 0.0)
 
             win_volumes = volumes[max(0, i - 19) : i + 1]
             vol_mean = _mean(win_volumes)
@@ -80,6 +91,16 @@ def generate_market_features(candles_by_ticker: dict[str, list[CandleRecord]]) -
 
             trend_regime = 1.0 if macd >= 0 else 0.0
             volatility_regime = 1.0 if rolling_vol > 0.01 else 0.0
+
+            return_lag_1 = prev_return_1
+            return_lag_2 = rows[-1].get("return_lag_1", 0.0) if rows and rows[-1].get("ticker") == ticker else 0.0
+            return_lag_5 = rows[-1].get("return_lag_2", 0.0) if rows and rows[-1].get("ticker") == ticker else 0.0
+
+            volatility_lag_1 = prev_volatility
+            rsi_lag_1 = prev_rsi
+
+            macd_momentum_interaction = macd * momentum_10
+            volume_volatility_interaction = vol_ratio * rolling_vol
 
             rows.append(
                 {
@@ -95,13 +116,28 @@ def generate_market_features(candles_by_ticker: dict[str, list[CandleRecord]]) -
                     "macd_signal": float(signal),
                     "atr_14": float(atr),
                     "zscore_20": float(zscore),
+                    "bb_position": float(bb_position),
+                    "mean_reversion_signal": float(mean_reversion_signal),
+                    "mean_reversion_direction": float(mean_reversion_direction),
                     "volume": float(volumes[i]),
                     "volume_ratio_20": float(vol_ratio),
                     "volume_zscore_20": float(vol_z),
                     "trend_regime": float(trend_regime),
                     "volatility_regime": float(volatility_regime),
+                    "return_lag_1": float(return_lag_1),
+                    "return_lag_2": float(return_lag_2),
+                    "return_lag_5": float(return_lag_5),
+                    "volatility_lag_1": float(volatility_lag_1),
+                    "rsi_lag_1": float(rsi_lag_1),
+                    "macd_momentum_interaction": float(macd_momentum_interaction),
+                    "volume_volatility_interaction": float(volume_volatility_interaction),
                 }
             )
+
+            prev_return_1 = ret
+            prev_volatility = rolling_vol
+            prev_rsi = rsi
+
     rows.sort(key=lambda x: (x["ticker"], x["timestamp"]))
     return rows
 

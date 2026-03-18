@@ -427,6 +427,8 @@ class BacktestStrategyStage(PipelineStage):
             position_size_pct=float(ctx.params.get("backtest", {}).get("position_size_pct", 0.05)),
             signal_column=str(ctx.stage_params.get("signal_column", "policy_signal" if policy_backtest_enabled else "expected_return")),
             target_position_column=("policy_target_position" if policy_backtest_enabled else None),
+            stop_loss_pct=ctx.params.get("backtest", {}).get("stop_loss_pct"),
+            take_profit_pct=ctx.params.get("backtest", {}).get("take_profit_pct"),
         )
 
         result = run_backtest(rows, bt_cfg)

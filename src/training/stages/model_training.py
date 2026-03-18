@@ -10,12 +10,16 @@ from src.data.ingestion.news.storage import news_features_parquet_path
 from src.domain.schemas import StageResult
 from src.models.classification.binary_direction import BinaryDirectionClassifier
 from src.models.classification.multiclass_action import MulticlassActionClassifier
+from src.models.classification.xgboost_direction import XGBoostDirectionClassifier, XGBOOST_AVAILABLE
+from src.models.classification.xgboost_multiclass import XGBoostMulticlassClassifier
 from src.models.ensemble.stacking_placeholder import StackingMetaModelPlaceholder
 from src.models.ensemble.weighted import WeightedEnsembleModel
 from src.models.news.news_feature_model import NewsFeatureModel
 from src.models.base.serialization import load_pickle
 from src.models.registry.repository import write_model_metadata
 from src.models.regression.gru_skeleton import GRURegressionSkeleton
+from src.models.regression.lightgbm_regression import LightGBMRegressionModel
+from src.models.regression.lstm_model import LSTMModel
 from src.models.regression.tabular_baseline import TabularRegressionBaseline
 from src.training.pipeline.base import PipelineStage, StageContext
 from src.training.tracking.mlflow_utils import build_mlflow_tracker
@@ -60,10 +64,15 @@ class TrainBaseModelsStage(PipelineStage):
 
         tabular = TabularRegressionBaseline()
         gru = GRURegressionSkeleton()
+        lightgbm = LightGBMRegressionModel()
+        lstm = LSTMModel()
         binary = BinaryDirectionClassifier()
         multi = MulticlassActionClassifier()
+        
+        all_models = [tabular, gru, lightgbm, lstm, binary, multi]
+        
         horizon = _prediction_horizon_from_params(ctx.params)
-        for model in [tabular, gru, binary, multi]:
+        for model in all_models:
             model.prediction_horizon = horizon
 
         metrics = {}
@@ -77,7 +86,8 @@ class TrainBaseModelsStage(PipelineStage):
                 feature_family="merged",
                 schema_version=str(ctx.params.get("features", {}).get("merged", {}).get("schema_version", "v1")),
             )
-            for model in [tabular, gru, binary, multi]:
+            all_models = [tabular, gru, lightgbm, lstm, binary, multi]
+            for model in all_models:
                 model_metrics = model.fit(rows, target_key="return_1")
                 model_path = ctx.workspace / "models" / "base" / f"{model.model_name}.pkl"
                 model.save(model_path)
@@ -90,14 +100,14 @@ class TrainBaseModelsStage(PipelineStage):
                 )
                 tracker.log_artifact(str(model_path), artifact_path="models/base")
 
-            tracker.log_params({"stage_name": ctx.stage_name, "model_count": 4})
+            tracker.log_params({"stage_name": ctx.stage_name, "model_count": len(all_models)})
             tracker.log_metrics(metrics)
 
         write_model_metadata(
             ctx.workspace / "models" / "base" / "metadata.json",
             {
                 "run_id": ctx.run_id,
-                "trained_models": [tabular.model_name, gru.model_name, binary.model_name, multi.model_name],
+                "trained_models": [m.model_name for m in all_models],
             },
         )
 
@@ -174,11 +184,15 @@ class TrainEnsembleModelStage(PipelineStage):
 
         ensemble = WeightedEnsembleModel(
             weights={
-                "tabular_regression_baseline": float(model_cfg.get("tabular_regression", 0.2)),
-                "gru_regression_skeleton": float(model_cfg.get("rnn_regression", 0.2)),
-                "binary_direction_classifier": float(model_cfg.get("binary_classifier", 0.2)),
-                "multiclass_action_classifier": float(model_cfg.get("multiclass_classifier", 0.2)),
-                "news_feature_model": float(model_cfg.get("news_model", 0.2)),
+                "lightgbm_regression": float(model_cfg.get("lightgbm_regression", 0.25)),
+                "lstm_regression": float(model_cfg.get("lstm_regression", 0.20)),
+                "xgboost_direction_classifier": float(model_cfg.get("xgboost_direction_classifier", 0.20)),
+                "xgboost_multiclass_classifier": float(model_cfg.get("xgboost_multiclass_classifier", 0.15)),
+                "news_feature_model": float(model_cfg.get("news_feature_model", 0.10)),
+                "tabular_regression_baseline": float(model_cfg.get("tabular_regression_baseline", 0.05)),
+                "gru_regression_skeleton": float(model_cfg.get("gru_regression_skeleton", 0.02)),
+                "binary_direction_classifier": float(model_cfg.get("binary_direction_classifier", 0.02)),
+                "multiclass_action_classifier": float(model_cfg.get("multiclass_action_classifier", 0.01)),
             },
             uncertainty_penalty=float(model_v2_cfg.get("uncertainty_penalty", 0.25)),
             turnover_penalty=float(model_v2_cfg.get("turnover_penalty", 0.10)),
@@ -190,14 +204,20 @@ class TrainEnsembleModelStage(PipelineStage):
 
         component_predictions = {}
         model_candidates = {
+            "lightgbm_regression": ctx.workspace / "models/base/lightgbm_regression.pkl",
+            "lstm_regression": ctx.workspace / "models/base/lstm_regression.pkl",
+            "xgboost_direction_classifier": ctx.workspace / "models/base/xgboost_direction_classifier.pkl",
+            "xgboost_multiclass_classifier": ctx.workspace / "models/base/xgboost_multiclass_classifier.pkl",
             "tabular_regression_baseline": ctx.workspace / "models/base/tabular_regression_baseline.pkl",
             "gru_regression_skeleton": ctx.workspace / "models/base/gru_regression_skeleton.pkl",
             "binary_direction_classifier": ctx.workspace / "models/base/binary_direction_classifier.pkl",
             "multiclass_action_classifier": ctx.workspace / "models/base/multiclass_action_classifier.pkl",
             "news_feature_model": ctx.workspace / "models/news/news_feature_model.pkl",
         }
-        for pkl in (ctx.workspace / "models/foundation").glob("*.pkl"):
-            model_candidates[pkl.stem] = pkl
+        
+        # Skip foundation models if chronos not available
+        # for pkl in (ctx.workspace / "models/foundation").glob("*.pkl"):
+        #     model_candidates[pkl.stem] = pkl
 
         for model_name, model_path in model_candidates.items():
             model = _load_model_if_exists(model_path)
