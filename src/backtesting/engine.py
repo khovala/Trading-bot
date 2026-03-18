@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
 
-@dataclass(slots=True)
+@dataclass
 class BacktestConfig:
     initial_cash: float = 1_000_000.0
     commission_bps: float = 5.0
@@ -16,6 +16,8 @@ class BacktestConfig:
     position_size_pct: float = 0.2
     signal_column: str = "expected_return"
     target_position_column: str | None = None
+    stop_loss_pct: float | None = field(default=None)
+    take_profit_pct: float | None = field(default=None)
 
 
 def _signal_from_row(row: dict[str, Any], threshold: float, signal_column: str) -> int:
@@ -57,17 +59,22 @@ def run_backtest(rows: list[dict[str, Any]], cfg: BacktestConfig) -> dict[str, A
     cash = cfg.initial_cash
     position = 0
     pending_signal: tuple[float, int] | None = None
+    last_target_position: float | None = None
     trade_log: list[dict[str, Any]] = []
     equity_curve: list[dict[str, Any]] = []
     turnover = 0.0
     exposures: list[float] = []
+    
+    entry_price = 0.0
+    stop_loss_triggered = False
+    take_profit_triggered = False
 
     for i, row in enumerate(ordered):
         ts = str(row["timestamp"])
         price = float(row["close"])
         target_position = _target_position_from_row(row, cfg.target_position_column)
         signal = _signal_from_row(row, cfg.signal_threshold, cfg.signal_column)
-        if pending_signal is None:
+        if pending_signal is None and target_position != last_target_position:
             if target_position is not None:
                 pending_signal = (target_position, i + cfg.execution_delay_bars)
             elif signal != 0:
@@ -77,7 +84,7 @@ def run_backtest(rows: list[dict[str, Any]], cfg: BacktestConfig) -> dict[str, A
             exec_signal = float(pending_signal[0])
             pending_signal = None
             signal_scale = abs(exec_signal) if cfg.target_position_column else 1.0
-            target_notional = max(0.0, cash * cfg.position_size_pct * signal_scale)
+            target_notional = max(0.0, cfg.initial_cash * cfg.position_size_pct * signal_scale)
             raw_qty = int(target_notional / max(1e-9, price))
             qty = max(0, (raw_qty // max(1, cfg.lot_size)) * max(1, cfg.lot_size))
             if exec_signal < 0:
@@ -92,6 +99,9 @@ def run_backtest(rows: list[dict[str, Any]], cfg: BacktestConfig) -> dict[str, A
                 cash -= commission
                 turnover += notional
                 position = qty
+                last_target_position = exec_signal
+                if position != 0:
+                    entry_price = fill_price
                 trade_log.append(
                     {
                         "timestamp": ts,
@@ -106,6 +116,20 @@ def run_backtest(rows: list[dict[str, Any]], cfg: BacktestConfig) -> dict[str, A
         benchmark_equity = cfg.initial_cash * (price / initial_price if initial_price else 1.0)
         exposure = abs(position * price) / max(1e-9, equity)
         exposures.append(exposure)
+        
+        if position != 0 and entry_price > 0:
+            pnl_pct = (price - entry_price) / entry_price if position > 0 else (entry_price - price) / entry_price
+            
+            if cfg.stop_loss_pct is not None and pnl_pct <= -cfg.stop_loss_pct:
+                stop_loss_triggered = True
+            if cfg.take_profit_pct is not None and pnl_pct >= cfg.take_profit_pct:
+                take_profit_triggered = True
+                
+            if stop_loss_triggered or take_profit_triggered:
+                exec_signal = 0
+                pending_signal = (float(exec_signal), i + cfg.execution_delay_bars)
+                stop_loss_triggered = False
+                take_profit_triggered = False
         equity_curve.append(
             {
                 "timestamp": ts,
