@@ -1,0 +1,30 @@
+{
+  "stage": "tune_policy_backtest",
+  "best": {
+    "candidate_index": 0,
+    "config": {
+      "min_confidence": 0.15,
+      "signal_deadband": 0.0,
+      "max_turnover_step": 0.02,
+      "signal_to_position_scale": 150.0,
+      "backtest_position_size_pct": 0.005,
+      "backtest_signal_threshold": 0.0
+    },
+    "metrics": {
+      "pnl": 0.0,
+      "drawdown": 0.0,
+      "sharpe": 0.0,
+      "sortino": 0.0,
+      "calmar": 0.0,
+      "hit_ratio": 0.0,
+      "turnover": 0.0,
+      "exposure": 0.0
+    },
+    "score": [
+      0.0,
+      0.0,
+      0.0,
+      -0.0
+    ]
+  }
+}

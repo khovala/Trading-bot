@@ -1,0 +1,102 @@
+[
+  {
+    "ticker": "SBER",
+    "name": "SBER PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 10,
+    "figi": "FIGI-SBER",
+    "isin": "ISIN-SBER",
+    "is_tradable": true
+  },
+  {
+    "ticker": "GAZP",
+    "name": "GAZP PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-GAZP",
+    "isin": "ISIN-GAZP",
+    "is_tradable": true
+  },
+  {
+    "ticker": "LKOH",
+    "name": "LKOH PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-LKOH",
+    "isin": "ISIN-LKOH",
+    "is_tradable": true
+  },
+  {
+    "ticker": "YNDX",
+    "name": "YNDX PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-YNDX",
+    "isin": "ISIN-YNDX",
+    "is_tradable": true
+  },
+  {
+    "ticker": "POLY",
+    "name": "POLY PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-POLY",
+    "isin": "ISIN-POLY",
+    "is_tradable": true
+  },
+  {
+    "ticker": "NVTK",
+    "name": "NVTK PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-NVTK",
+    "isin": "ISIN-NVTK",
+    "is_tradable": true
+  },
+  {
+    "ticker": "MGNT",
+    "name": "MGNT PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-MGNT",
+    "isin": "ISIN-MGNT",
+    "is_tradable": true
+  },
+  {
+    "ticker": "SNGS",
+    "name": "SNGS PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-SNGS",
+    "isin": "ISIN-SNGS",
+    "is_tradable": true
+  },
+  {
+    "ticker": "TATN",
+    "name": "TATN PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-TATN",
+    "isin": "ISIN-TATN",
+    "is_tradable": true
+  },
+  {
+    "ticker": "SNGSP",
+    "name": "SNGSP PJSC",
+    "exchange": "MOEX",
+    "currency": "RUB",
+    "lot": 1,
+    "figi": "FIGI-SNGSP",
+    "isin": "ISIN-SNGSP",
+    "is_tradable": true
+  }
+]

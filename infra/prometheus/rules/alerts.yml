@@ -1,0 +1,126 @@
+groups:
+  - name: trading_pipeline_alerts
+    rules:
+      - alert: PipelineFailure
+        expr: pipeline_report_count == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: trading
+        annotations:
+          summary: "Trading pipeline failed"
+          description: "No pipeline reports generated for 5 minutes"
+
+      - alert: HighDrawdown
+        expr: strategy_drawdown > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: trading
+        annotations:
+          summary: "High trading drawdown"
+          description: "Strategy drawdown is {{ $value | humanizePercentage }}"
+
+      - alert: CriticalDrawdown
+        expr: strategy_drawdown > 0.2
+        for: 5m
+        labels:
+          severity: critical
+          team: trading
+        annotations:
+          summary: "Critical drawdown detected"
+          description: "Strategy drawdown exceeded 20%!"
+
+      - alert: LowSharpeRatio
+        expr: strategy_sharpe < 0.5
+        for: 30m
+        labels:
+          severity: warning
+          team: trading
+        annotations:
+          summary: "Low Sharpe ratio"
+          description: "Strategy Sharpe ratio is {{ $value }}"
+
+      - alert: ModelAccuracyDrop
+        expr: model_directional_accuracy < 0.48
+        for: 15m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Model accuracy dropped"
+          description: "Model directional accuracy is {{ $value }}"
+
+      - alert: StaleData
+        expr: stale_data_flag == 1
+        for: 1m
+        labels:
+          severity: warning
+          team: data
+        annotations:
+          summary: "Stale market data detected"
+          description: "Market data has not been updated"
+
+  - name: infrastructure_alerts
+    rules:
+      - alert: APIDown
+        expr: up{job="api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Trading API is down"
+          description: "API has been unreachable for 1 minute"
+
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(api_request_latency_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High API latency"
+          description: "95th percentile latency is {{ $value }}s"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 15m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+
+  - name: broker_alerts
+    rules:
+      - alert: OrderFailures
+        expr: rate(order_failure_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: trading
+        annotations:
+          summary: "High order failure rate"
+          description: "Order failure rate is {{ $value }} per second"
+
+      - alert: NoFreshNews
+        expr: news_freshness_seconds > 3600
+        for: 5m
+        labels:
+          severity: info
+          team: data
+        annotations:
+          summary: "No fresh news data"
+          description: "No news items received in the last hour"

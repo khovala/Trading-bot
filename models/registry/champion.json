@@ -1,0 +1,38 @@
+{
+  "champion_model": "existing_champion",
+  "promoted_at": "2026-03-16T06:11:24.524285+00:00",
+  "source_run_id": "ba5ba4b4-39d0-48dc-a394-cdad484801c0",
+  "decision": "keep_champion",
+  "promotion_checks": {
+    "promotion_criteria": {
+      "walk_forward_sharpe_mean_min": false,
+      "max_drawdown_max": true,
+      "min_positive_folds_ratio": false,
+      "min_turnover_reduction_vs_baseline": false,
+      "cost_stress_passed": true,
+      "has_calibration_report": true,
+      "has_leakage_report": true
+    },
+    "stage3_signals": {
+      "legacy_promotion_sharpe_threshold": false,
+      "ablation_positive_ratio": true,
+      "weight_concentration_hhi": true,
+      "policy_avg_utility": true,
+      "policy_avg_turnover_proxy": true
+    }
+  },
+  "promotion_details": {
+    "pnl": -22826.91417278652,
+    "drawdown": 0.0228443523241721,
+    "walk_forward_sharpe_mean": -0.2405423233086926,
+    "turnover": 30681521.67838201,
+    "baseline_turnover": 30681521.67838201,
+    "turnover_reduction_vs_baseline": 0.0,
+    "positive_fold_ratio": 0.0,
+    "ablation_positive_ratio": 0.5,
+    "ensemble_weight_concentration_hhi": 0.5000000006136968,
+    "policy_avg_utility": -0.1901287704465355,
+    "policy_avg_turnover_proxy": 0.04497896356225834
+  },
+  "decision_snapshot_path": "artifacts/comparison/decision.json"
+}

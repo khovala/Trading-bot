@@ -1,0 +1,7 @@
+{
+  "run_id": "1d4bd90e-36d8-4c3e-8f5d-8087d799b494",
+  "trained_models": [
+    "timesfm2_wrapper",
+    "patchtst_wrapper"
+  ]
+}

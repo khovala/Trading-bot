@@ -1,0 +1,52 @@
+{
+  "run_id": "0e0f4ad8-351b-441b-ba91-a3f7de27e7c0",
+  "published_at": "2026-03-16T06:11:25.368688+00:00",
+  "promotion_summary": {
+    "decision": "keep_champion",
+    "checks": {
+      "promotion_criteria": {
+        "walk_forward_sharpe_mean_min": false,
+        "max_drawdown_max": true,
+        "min_positive_folds_ratio": false,
+        "min_turnover_reduction_vs_baseline": false,
+        "cost_stress_passed": true,
+        "has_calibration_report": true,
+        "has_leakage_report": true
+      },
+      "stage3_signals": {
+        "legacy_promotion_sharpe_threshold": false,
+        "ablation_positive_ratio": true,
+        "weight_concentration_hhi": true,
+        "policy_avg_utility": true,
+        "policy_avg_turnover_proxy": true
+      }
+    },
+    "details": {
+      "pnl": -22826.91417278652,
+      "drawdown": 0.0228443523241721,
+      "walk_forward_sharpe_mean": -0.2405423233086926,
+      "turnover": 30681521.67838201,
+      "baseline_turnover": 30681521.67838201,
+      "turnover_reduction_vs_baseline": 0.0,
+      "positive_fold_ratio": 0.0,
+      "ablation_positive_ratio": 0.5,
+      "ensemble_weight_concentration_hhi": 0.5000000006136968,
+      "policy_avg_utility": -0.1901287704465355,
+      "policy_avg_turnover_proxy": 0.04497896356225834
+    },
+    "champion_model": "existing_champion"
+  },
+  "artifacts": [
+    "models/base",
+    "models/news",
+    "models/ensemble",
+    "models/registry/champion.json",
+    "artifacts/backtests/backtest_summary.json",
+    "artifacts/evaluation/ensemble_ablation.json",
+    "artifacts/comparison/decision.json",
+    "reports/evaluate_models.json",
+    "reports/backtest_strategy.json",
+    "reports/compare_with_production.json",
+    "reports/promote_model.json"
+  ]
+}

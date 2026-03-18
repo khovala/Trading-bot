@@ -1,0 +1,30 @@
+{
+  "stage": "train_ensemble_model",
+  "model_count": 1,
+  "ensemble_weights": {
+    "lightgbm_regression": 1.0
+  },
+  "ensemble_diagnostics": {
+    "base_weights": {
+      "lightgbm_regression": 1.0
+    },
+    "dynamic_scores": {
+      "lightgbm_regression": 0.6604387980628207
+    },
+    "model_stats": {
+      "lightgbm_regression": {
+        "avg_confidence": 0.05323099786952699,
+        "avg_abs_expected_return": 0.0010646199573905453,
+        "turnover_proxy": 0.0008741010174701561,
+        "uncertainty_proxy": 0.946769002130473,
+        "raw_score": 0.6604387980628207
+      }
+    }
+  },
+  "ablation": {
+    "lightgbm_regression": {
+      "mean_abs_expected_return_delta": 0.0010646199573905453,
+      "ensemble_weight": 1.0
+    }
+  }
+}
