@@ -398,36 +398,44 @@ def get_signal(row, market_momentum):
 
 ### 8.2 Сравнение стратегий
 
-| Стратегия | Таймфрейм | PnL | Trades | Win Rate | MAE/Accuracy |
-|-----------|------------|-----|--------|----------|--------------|
-| RSI/Z-Score | 1min | **-11,262,578 ₽** | 36,989 | 50.01% | - |
-| ML Regression | 1H | -997,167 ₽ | 172 | 55.23% | MAE=0.00047 |
-| ML Classifier | 1H | -1,012,327 ₽ | 189 | 49.74% | Acc=88.5% |
+| Стратегия | Таймфрейм | PnL | Trades | Win Rate | Особенности |
+|-----------|------------|------|--------|----------|-------------|
+| RSI/Z-Score | 1min | **-11,262,578 ₽** | 36,989 | 50.01% | Высокая частота |
+| ML Regression | 1H | -997,167 ₽ | 172 | 55.23% | ML предсказания |
+| ML Classifier | 1H | -1,012,327 ₽ | 189 | 49.74% | Direction prediction |
+| **Ensemble+SL** | **1H** | **-309,210 ₽** | **5,985** | **49.76%** | **Stop-loss, Long-only** |
 
-### 8.3 Лучшая стратегия: ML Regression на часовом таймфрейме
+### 8.3 Лучшая стратегия: Ensemble + Stop-Loss (Long-Only)
+
+**Особенности:**
+- Ensemble из 3 моделей (GradientBoostingRegressor, GradientBoostingClassifier, ExtraTreesClassifier)
+- Stop-loss: 2%, Take-profit: 3%
+- Dynamic position sizing
+- Long-only (без short)
+- Probability threshold: 55%
 
 **Результаты по тикерам:**
 
-| Тикер | PnL | Trades | W/L |
-|-------|------|--------|-----|
-| NVTK | -98,129 ₽ | 22 | 13/9 |
-| YNDX | -98,129 ₽ | 22 | 13/9 |
-| MGNT | -99,159 ₽ | 14 | 7/7 |
-| GAZP | -99,477 ₽ | 21 | 10/11 |
-| POLY | -99,783 ₽ | 11 | 6/5 |
-| SNGS | -99,878 ₽ | 15 | 13/2 |
-| LKOH | -99,938 ₽ | 14 | 6/8 |
-| TATN | -100,417 ₽ | 22 | 12/10 |
-| SBER | -100,554 ₽ | 16 | 10/6 |
-| SNGSP | -101,702 ₽ | 15 | 5/10 |
+| Тикер | PnL | Trades | W/L/SL |
+|-------|------|--------|---------|
+| GAZP | -16,265 ₽ | 593 | 306/263/23 |
+| MGNT | -22,022 ₽ | 572 | 290/278/4 |
+| POLY | -23,448 ₽ | 591 | 305/256/29 |
+| SNGSP | -23,491 ₽ | 606 | 314/276/15 |
+| TATN | -24,676 ₽ | 581 | 294/276/11 |
+| SBER | -26,462 ₽ | 585 | 276/264/45 |
+| SNGS | -42,796 ₽ | 609 | 282/226/101 |
+| LKOH | -43,048 ₽ | 610 | 301/245/63 |
+| NVTK | -43,501 ₽ | 619 | 305/250/64 |
+| YNDX | -43,501 ₽ | 619 | 305/250/64 |
 
 ### 8.4 Улучшения по сравнению с базовой стратегией
 
-| Метрика | Базовый (1min RSI) | Лучший (1H ML) | Улучшение |
-|---------|---------------------|----------------|-----------|
-| PnL | -11,262,578 ₽ | -997,167 ₽ | **+10.3M ₽** |
-| Trades | 36,989 | 172 | **-99.5%** |
-| Win Rate | 50.01% | 55.23% | **+5.2%** |
+| Метрика | Базовый (1min RSI) | Лучший (Ensemble+SL) | Улучшение |
+|---------|---------------------|----------------------|-----------|
+| PnL | -11,262,578 ₽ | **-309,210 ₽** | **+10.95M ₽** |
+| Trades | 36,989 | 5,985 | **-84%** |
+| Win Rate | 50.01% | 49.76% | -0.25% |
 
 ### 8.5 Анализ результатов
 
@@ -445,7 +453,15 @@ def get_signal(row, market_momentum):
 
 ## 9. Обученные модели
 
-### 9.1 Регрессионная модель (sklearn_gradient_boosting_full)
+### 9.1 Ensemble модель (production)
+
+| Модель | Тип | Accuracy/MAE | Время |
+|--------|-----|-------------|-------|
+| reg_gb1 | HistGradientBoostingRegressor | MAE=0.00083 | 1.1s |
+| cls_gb1 | HistGradientBoostingClassifier | Acc=88.5% | 19.1s |
+| cls_et | ExtraTreesClassifier | Acc=81.7% | 4.1s |
+
+### 9.2 Регрессионная модель (standalone)
 
 | Параметр | Значение |
 |----------|---------|
@@ -458,7 +474,7 @@ def get_signal(row, market_momentum):
 | RMSE | 0.000633 |
 | Время обучения | 15.4 сек |
 
-### 9.2 Классификационная модель (directional_classifier)
+### 9.3 Классификационная модель (standalone)
 
 | Параметр | Значение |
 |----------|---------|
@@ -493,28 +509,27 @@ def get_signal(row, market_momentum):
 | Стратегия | PnL | Trades | Win Rate |
 |-----------|------|--------|----------|
 | 1min RSI/Z-Score | -11.3M ₽ | 36,989 | 50% |
-| **1H ML Regression** | **-997K ₽** | 172 | **55%** |
-| 1H ML Classifier | -1.0M ₽ | 189 | 50% |
+| 1H ML Regression | -997K ₽ | 172 | 55% |
+| **1H Ensemble+SL** | **-309K ₽** | **5,985** | **50%** |
 
-**Вывод:** Переход на часовой таймфрейм с ML-моделями улучшил результаты в 10+ раз.
+**Вывод:** Ensemble + Stop-Loss + Long-only - лучшая стратегия на mock данных.
 
 ### 10.3 Следующие шаги
 
-1. **Получить реальные данные** — интеграция с Tinkoff/брокером
-2. **Улучшить модель** — добавить больше признаков, ensemble
-3. **Оптимизировать стратегию** — добавить stop-loss, position sizing
-4. **Тестировать на реальных данных** — сравнить с бэктестом
-5. **Deploy на Yandex Cloud** — автоматизация пайплайна
+1. **Интеграция с Tinkoff Sandbox** — получить реальные рыночные данные
+2. **Тестировать на реальных данных** — сравнить с бэктестом
+3. **Оптимизировать параметры** — подобрать лучший stop-loss/take-profit
+4. **Deploy на Yandex Cloud** — автоматизация пайплайна
 
 ### 10.4 Рекомендации для production
 
 | Приоритет | Действие | Статус |
 |-----------|----------|--------|
-| 1 | sklearn GradientBoosting | ✅ Выполнено |
-| 2 | Часовой таймфрейм | ✅ Выполнено |
-| 3 | Обучение на полном датасете | ✅ Выполнено |
-| 4 | Реальные данные от брокера | ⏳ В ожидании |
-| 5 | Ensemble моделей | ⏳ В ожидании |
+| 1 | Ensemble моделей | ✅ Выполнено |
+| 2 | Stop-loss / Take-profit | ✅ Выполнено |
+| 3 | Long-only стратегия | ✅ Выполнено |
+| 4 | Реальные данные от Tinkoff | ⏳ В ожидании |
+| 5 | Deploy на Yandex Cloud | ⏳ В ожидании |
 
 ---
 
@@ -524,23 +539,22 @@ def get_signal(row, market_momentum):
 moex-sandbox-platform/
 ├── params.yaml                    # lookback_days: 90
 ├── data/
-│   ├── raw/market/candles/       # 1,296,010 свечей
-│   ├── interim/market/            # Препроцессинг
-│   └── processed/merged/         # Train/Val/Test
-│       ├── train.parquet         # 907,200 строк
-│       ├── validation.parquet    # 194,400 строк
-│       └── test.parquet          # 194,410 строк
+│   ├── raw/market/candles/       # 1,296,010 свечей (mock)
+│   └── processed/merged/          # Train/Val/Test
+│       ├── train.parquet          # 907,200 строк
+│       ├── validation.parquet     # 194,400 строк
+│       └── test.parquet           # 194,410 строк
 ├── models/base/
-│   ├── sklearn_gradient_boosting_full.pkl   # Регрессия (907K samples)
-│   └── directional_classifier.pkl           # Классификация (88.5% acc)
+│   ├── ensemble_models.pkl        # Ensemble (3 модели)
+│   ├── sklearn_gradient_boosting_full.pkl   # Регрессия
+│   └── directional_classifier.pkl             # Классификация
 ├── reports/
-│   ├── backtest_hourly_ml_full.json   # Результаты ML regression
-│   ├── backtest_hourly_classifier.json # Результаты classifier
-│   ├── model_full_training.json        # Метрики модели
-│   └── model_directional_training.json # Метрики классификатора
-├── train_model_full.py           # Обучение регрессии
-├── train_classifier.py           # Обучение классификации
-├── run_backtest_hourly_ml.py    # Бэктест ML
+│   ├── backtest_ensemble_stoploss.json  # Лучший результат
+│   ├── backtest_hourly_ml_full.json     # ML regression
+│   └── model_ensemble_training.json      # Ensemble метрики
+├── train_ensemble.py              # Обучение ensemble
+├── run_backtest_advanced.py      # Advanced backtest
+├── fetch_real_data.py            # Загрузка данных Tinkoff
 └── pipeline90_final_description.md # Этот отчёт
 ```
 

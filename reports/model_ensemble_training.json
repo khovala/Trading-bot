@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-03-19T13:33:56.755066+00:00",
+  "model_type": "ensemble",
+  "models": {
+    "reg_gb1": {
+      "type": "HistGradientBoostingRegressor",
+      "train_mae": 0.0008330136833118053
+    },
+    "cls_gb1": {
+      "type": "HistGradientBoostingClassifier",
+      "train_accuracy": 0.8849294532627866
+    },
+    "cls_et": {
+      "type": "ExtraTreesClassifier",
+      "train_accuracy": 0.8167746913580247
+    }
+  },
+  "training_samples": 907200,
+  "features": [
+    "rolling_volatility_20",
+    "momentum_10",
+    "rsi_14",
+    "macd",
+    "macd_signal",
+    "atr_14",
+    "zscore_20",
+    "volume_ratio_20",
+    "volume_zscore_20",
+    "trend_regime",
+    "volatility_regime",
+    "return_1_lag1",
+    "return_1_lag2",
+    "return_lag5",
+    "rolling_volatility_20_lag1",
+    "rsi_14_lag1",
+    "macd_momentum_interaction",
+    "volume_volatility_interaction"
+  ]
+}

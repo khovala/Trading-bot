@@ -1,0 +1,100 @@
+{
+  "timestamp": "2026-03-19T13:36:51.016245+00:00",
+  "strategy": "EnsembleStopLoss",
+  "period": "79 days",
+  "timeframe": "1H",
+  "features": {
+    "ensemble_models": [
+      "reg_gb1",
+      "cls_gb1",
+      "cls_et"
+    ],
+    "stop_loss_pct": 0.02,
+    "take_profit_pct": 0.03,
+    "position_sizing": "dynamic",
+    "prob_threshold": 0.55
+  },
+  "results": {
+    "total_pnl": -309209.5860266794,
+    "trades": 5985,
+    "stop_losses": 419,
+    "win_rate": 0.49757727652464495,
+    "by_ticker": {
+      "GAZP": {
+        "pnl": -16264.7113632229,
+        "trades": 593,
+        "wins": 306,
+        "losses": 263,
+        "stop_losses": 23
+      },
+      "LKOH": {
+        "pnl": -43048.277732490424,
+        "trades": 610,
+        "wins": 301,
+        "losses": 245,
+        "stop_losses": 63
+      },
+      "MGNT": {
+        "pnl": -22021.65326941087,
+        "trades": 572,
+        "wins": 290,
+        "losses": 278,
+        "stop_losses": 4
+      },
+      "NVTK": {
+        "pnl": -43500.95063706396,
+        "trades": 619,
+        "wins": 305,
+        "losses": 250,
+        "stop_losses": 64
+      },
+      "POLY": {
+        "pnl": -23448.083069943998,
+        "trades": 591,
+        "wins": 305,
+        "losses": 256,
+        "stop_losses": 29
+      },
+      "SBER": {
+        "pnl": -26462.126385467753,
+        "trades": 585,
+        "wins": 276,
+        "losses": 264,
+        "stop_losses": 45
+      },
+      "SNGS": {
+        "pnl": -42795.900727069435,
+        "trades": 609,
+        "wins": 282,
+        "losses": 226,
+        "stop_losses": 101
+      },
+      "SNGSP": {
+        "pnl": -23490.852883776523,
+        "trades": 606,
+        "wins": 314,
+        "losses": 276,
+        "stop_losses": 15
+      },
+      "TATN": {
+        "pnl": -24676.079321169564,
+        "trades": 581,
+        "wins": 294,
+        "losses": 276,
+        "stop_losses": 11
+      },
+      "YNDX": {
+        "pnl": -43500.95063706396,
+        "trades": 619,
+        "wins": 305,
+        "losses": 250,
+        "stop_losses": 64
+      }
+    }
+  },
+  "comparison": {
+    "minute_pnl": -11262578,
+    "hourly_ml_pnl": -997167,
+    "ensemble_pnl": -309209.5860266794
+  }
+}
