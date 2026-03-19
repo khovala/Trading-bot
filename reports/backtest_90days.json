@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-03-19T11:42:26.130157+00:00",
+  "strategy": "MeanReversionMarketTiming",
+  "period": "90 days",
+  "config": {
+    "position_size_pct": 0.3,
+    "market_threshold": -0.03,
+    "rsi_oversold": 35,
+    "rsi_overbought": 65,
+    "zscore_oversold": -1.5,
+    "zscore_overbought": 1.5,
+    "commission_bps": 5.0,
+    "slippage_bps": 5.0
+  },
+  "results": {
+    "total_pnl": -11262577.996172525,
+    "trades": 36989,
+    "win_rate": 0.5000675876611965,
+    "by_ticker": {
+      "GAZP": {
+        "pnl": -1104379.4467373816,
+        "trades": 3643,
+        "wins": 1821,
+        "losses": 1822
+      },
+      "LKOH": {
+        "pnl": -1055466.0950186807,
+        "trades": 3742,
+        "wins": 1871,
+        "losses": 1871
+      },
+      "MGNT": {
+        "pnl": -1089949.7544951611,
+        "trades": 3687,
+        "wins": 1843,
+        "losses": 1844
+      },
+      "NVTK": {
+        "pnl": -1166184.6089385832,
+        "trades": 3679,
+        "wins": 1841,
+        "losses": 1838
+      },
+      "POLY": {
+        "pnl": -1119905.5073009785,
+        "trades": 3783,
+        "wins": 1892,
+        "losses": 1891
+      },
+      "SBER": {
+        "pnl": -1066351.985087932,
+        "trades": 3729,
+        "wins": 1865,
+        "losses": 1864
+      },
+      "SNGS": {
+        "pnl": -1230511.6157996221,
+        "trades": 3669,
+        "wins": 1834,
+        "losses": 1835
+      },
+      "SNGSP": {
+        "pnl": -1151617.4200290823,
+        "trades": 3644,
+        "wins": 1823,
+        "losses": 1821
+      },
+      "TATN": {
+        "pnl": -1112026.9538265197,
+        "trades": 3734,
+        "wins": 1866,
+        "losses": 1868
+      },
+      "YNDX": {
+        "pnl": -1166184.6089385832,
+        "trades": 3679,
+        "wins": 1841,
+        "losses": 1838
+      }
+    }
+  }
+}

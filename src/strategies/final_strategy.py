@@ -47,8 +47,8 @@ class MeanReversionMarketTimingStrategy:
         df = df.copy()
         
         # Calculate market momentum
-        market_mom = df.groupby('date')['daily_return'].mean().to_dict()
-        df['market_momentum'] = df['date'].map(market_mom)
+        market_mom = df.groupby('timestamp')['return_1'].mean().to_dict()
+        df['market_momentum'] = df['timestamp'].map(market_mom)
         
         cfg = BacktestConfig(
             initial_cash=1_000_000,
@@ -67,14 +67,14 @@ class MeanReversionMarketTimingStrategy:
         results_by_ticker = {}
         
         for ticker in df['ticker'].unique():
-            ticker_df = df[df['ticker'] == ticker].sort_values('date').reset_index(drop=True)
+            ticker_df = df[df['ticker'] == ticker].sort_values('timestamp').reset_index(drop=True)
             rows = ticker_df.to_dict('records')
             
             positions = []
             for row in rows:
                 market_mom = row.get('market_momentum', 0)
-                rsi = row.get('rsi_14_last', 50)
-                zscore = row.get('zscore_20_last', 0)
+                rsi = row.get('rsi_14', 50)
+                zscore = row.get('zscore_20', 0)
                 
                 # Market timing filter
                 if self.config.use_market_timing and market_mom < self.config.market_threshold:
@@ -163,20 +163,23 @@ class MeanReversionMarketTimingStrategy:
 
 def main():
     df = pd.read_parquet('data/processed/merged/daily_aggregated.parquet')
-    print(f'Data: {len(df)} rows, {df[\"date\"].nunique()} days')
+    days = df["date"].nunique()
+    print(f'Data: {len(df)} rows, {days} days')
     
     strategy = MeanReversionMarketTimingStrategy()
     
-    print('\\n=== Final Strategy Backtest ===')
+    print('\n=== Final Strategy Backtest ===')
     result = strategy.run_backtest(df)
     
     print(f'Total PnL: {result.total_pnl:,.0f} rub')
     print(f'Total Trades: {result.trades}')
     print(f'Win Rate: {result.win_rate:.1%}')
     
-    print('\\nBy Ticker:')
+    print('\nBy Ticker:')
     for ticker, res in sorted(result.tickers.items(), key=lambda x: x[1]['pnl'], reverse=True):
-        print(f'  {ticker}: PnL={res[\"pnl\"]:,.0f}, Trades={res[\"trades\"]}')
+        pnl = res["pnl"]
+        trades = res["trades"]
+        print(f'  {ticker}: PnL={pnl:,.0f}, Trades={trades}')
     
     # Save result
     output = {
