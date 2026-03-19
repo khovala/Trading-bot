@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-03-19T13:10:47.773270+00:00",
+  "model_name": "directional_classifier",
+  "model_version": "v1",
+  "training_samples": 907200,
+  "features": [
+    "rolling_volatility_20",
+    "momentum_10",
+    "rsi_14",
+    "macd",
+    "macd_signal",
+    "atr_14",
+    "zscore_20",
+    "volume_ratio_20",
+    "volume_zscore_20",
+    "trend_regime",
+    "volatility_regime",
+    "return_1_lag1",
+    "return_1_lag2",
+    "return_lag5",
+    "rolling_volatility_20_lag1",
+    "rsi_14_lag1",
+    "macd_momentum_interaction",
+    "volume_volatility_interaction"
+  ],
+  "training_time_seconds": 18.186063,
+  "metrics": {
+    "train_accuracy": 0.8849294532627866
+  }
+}

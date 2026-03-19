@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-03-19T12:56:33.159308+00:00",
+  "strategy": "HourlyMLFullModel",
+  "period": "79 days",
+  "timeframe": "1H",
+  "data_points": 18380,
+  "model": {
+    "name": "sklearn_gradient_boosting_full",
+    "version": "v1_full",
+    "training_samples": 907200
+  },
+  "results": {
+    "total_pnl": -997167.2880919445,
+    "trades": 172,
+    "win_rate": 0.5523255813953488,
+    "by_ticker": {
+      "GAZP": {
+        "pnl": -99476.78620748223,
+        "trades": 21,
+        "wins": 10,
+        "losses": 11
+      },
+      "LKOH": {
+        "pnl": -99937.99699632417,
+        "trades": 14,
+        "wins": 6,
+        "losses": 8
+      },
+      "MGNT": {
+        "pnl": -99159.38891242926,
+        "trades": 14,
+        "wins": 7,
+        "losses": 7
+      },
+      "NVTK": {
+        "pnl": -98129.21143155548,
+        "trades": 22,
+        "wins": 13,
+        "losses": 9
+      },
+      "POLY": {
+        "pnl": -99783.31718709678,
+        "trades": 11,
+        "wins": 6,
+        "losses": 5
+      },
+      "SBER": {
+        "pnl": -100554.11694475227,
+        "trades": 16,
+        "wins": 10,
+        "losses": 6
+      },
+      "SNGS": {
+        "pnl": -99878.33117030268,
+        "trades": 15,
+        "wins": 13,
+        "losses": 2
+      },
+      "SNGSP": {
+        "pnl": -101702.18392672998,
+        "trades": 15,
+        "wins": 5,
+        "losses": 10
+      },
+      "TATN": {
+        "pnl": -100416.74388371612,
+        "trades": 22,
+        "wins": 12,
+        "losses": 10
+      },
+      "YNDX": {
+        "pnl": -98129.21143155548,
+        "trades": 22,
+        "wins": 13,
+        "losses": 9
+      }
+    }
+  },
+  "comparison": {
+    "minute_pnl": -11262578,
+    "hourly_ml_full_pnl": -997167.2880919445,
+    "improvement": 10265410.711908055
+  }
+}

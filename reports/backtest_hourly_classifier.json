@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-03-19T13:11:59.991056+00:00",
+  "strategy": "HourlyDirectionalClassifier",
+  "period": "79 days",
+  "timeframe": "1H",
+  "data_points": 18380,
+  "model": {
+    "name": "directional_classifier",
+    "version": "v1",
+    "training_accuracy": 1.0
+  },
+  "results": {
+    "total_pnl": -1012326.6462281544,
+    "trades": 189,
+    "win_rate": 0.4973544973544973,
+    "by_ticker": {
+      "GAZP": {
+        "pnl": -94314.78636040555,
+        "trades": 19,
+        "wins": 8,
+        "losses": 11
+      },
+      "LKOH": {
+        "pnl": -108399.20622184602,
+        "trades": 32,
+        "wins": 20,
+        "losses": 12
+      },
+      "MGNT": {
+        "pnl": -98493.14146875075,
+        "trades": 16,
+        "wins": 9,
+        "losses": 7
+      },
+      "NVTK": {
+        "pnl": -101338.90102966793,
+        "trades": 23,
+        "wins": 10,
+        "losses": 13
+      },
+      "POLY": {
+        "pnl": -99774.77735780693,
+        "trades": 22,
+        "wins": 12,
+        "losses": 10
+      },
+      "SBER": {
+        "pnl": -103021.91504761588,
+        "trades": 13,
+        "wins": 8,
+        "losses": 5
+      },
+      "SNGS": {
+        "pnl": -101357.78613956159,
+        "trades": 13,
+        "wins": 5,
+        "losses": 8
+      },
+      "SNGSP": {
+        "pnl": -105729.6308059633,
+        "trades": 17,
+        "wins": 6,
+        "losses": 11
+      },
+      "TATN": {
+        "pnl": -98557.60076686856,
+        "trades": 11,
+        "wins": 6,
+        "losses": 5
+      },
+      "YNDX": {
+        "pnl": -101338.90102966793,
+        "trades": 23,
+        "wins": 10,
+        "losses": 13
+      }
+    }
+  },
+  "comparison": {
+    "minute_pnl": -11262578,
+    "hourly_clf_pnl": -1012326.6462281544,
+    "improvement": 10250251.353771845
+  }
+}

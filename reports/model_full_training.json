@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-03-19T12:02:32.828294+00:00",
+  "model_name": "sklearn_gradient_boosting_full",
+  "model_version": "v1_full",
+  "training_samples": 907200,
+  "features": [
+    "rolling_volatility_20",
+    "momentum_10",
+    "rsi_14",
+    "macd",
+    "macd_signal",
+    "atr_14",
+    "zscore_20",
+    "volume_ratio_20",
+    "volume_zscore_20",
+    "trend_regime",
+    "volatility_regime",
+    "return_lag_1",
+    "return_lag_2",
+    "return_lag_5",
+    "volatility_lag_1",
+    "rsi_lag_1",
+    "macd_momentum_interaction",
+    "volume_volatility_interaction"
+  ],
+  "training_time_seconds": 15.361655,
+  "metrics": {
+    "train_mae": 0.0004744386602528952,
+    "train_rmse": 0.0006326883773137608,
+    "mean_target": -2.4689084057172295e-06,
+    "std_target": 0.0013896394520998001
+  }
+}
