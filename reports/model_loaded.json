@@ -1,0 +1,5 @@
+{
+  "model": "sklearn_gradient_boosting",
+  "version": "v1",
+  "prediction_horizon": "60m"
+}

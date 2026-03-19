@@ -10,7 +10,7 @@ data:
   market:
     provider: t_invest_sandbox
     interval: 1min
-    lookback_days: 30
+    lookback_days: 90
     instruments:
       - SBER
       - GAZP

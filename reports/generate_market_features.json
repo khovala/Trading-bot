@@ -1,10 +1,10 @@
 {
-  "run_id": "e28c19a1-c1f1-4198-821e-eebad54b48cd",
+  "run_id": "385b9f63-fcc7-453b-8dd3-42851a8cfcf5",
   "stage_name": "generate_market_features",
   "success": true,
   "metrics": {
     "ticker_count": 10.0,
-    "market_feature_row_count": 432010.0
+    "market_feature_row_count": 1296010.0
   },
   "artifacts": [
     "data/processed/market/features/market_features.parquet"

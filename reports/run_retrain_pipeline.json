@@ -1,9 +1,0 @@
-{
-  "run_id": "02e70a46-3d2a-497d-883b-744eea4e6d4f",
-  "stage_name": "run_retrain_pipeline",
-  "success": true,
-  "metrics": {
-    "placeholder": 1.0
-  },
-  "artifacts": []
-}

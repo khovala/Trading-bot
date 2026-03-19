@@ -1,14 +1,15 @@
 {
-  "run_id": "930f1aa2-af0c-457a-a706-138fd4577c81",
+  "run_id": "a98e8896-cfd5-4091-aa27-95256b062238",
   "stage_name": "merge_feature_sets",
   "success": true,
   "metrics": {
-    "merged_row_count": 432010.0,
-    "train_row_count": 302400.0,
-    "validation_row_count": 64800.0,
-    "test_row_count": 64810.0,
+    "merged_row_count": 1296010.0,
+    "train_row_count": 907200.0,
+    "validation_row_count": 194400.0,
+    "test_row_count": 194410.0,
     "merge_bucket_minutes": 60.0,
-    "news_lag_buckets": 1.0
+    "news_lag_buckets": 1.0,
+    "missing_inputs": 1.0
   },
   "artifacts": [
     "data/processed/merged/train.parquet",
