@@ -72,6 +72,9 @@ class TinkoffConfig:
     def __post_init__(self):
         if not self.sandbox:
             self.base_url = "https://invest-public-api.tinkoff.ru"
+        else:
+            # Use correct sandbox endpoint
+            self.base_url = "https://sandbox-invest-public-api.tinkoff.ru"
 
 
 class TinkoffClient:
@@ -121,7 +124,9 @@ class TinkoffClient:
 
     async def connect(self) -> None:
         if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession()
+            self._session = aiohttp.ClientSession(
+                connector=aiohttp.TCPConnector(ssl=False)
+            )
 
     async def disconnect(self) -> None:
         if self._session and not self._session.closed:

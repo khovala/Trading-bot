@@ -1,0 +1,148 @@
+{
+  "timestamp": "2026-03-23T13:28:08.694829+00:00",
+  "strategy": "AdvancedStrategy",
+  "config": {
+    "rsi_oversold": 35,
+    "zscore_oversold": -1.5,
+    "volume_ratio_min": 1.0,
+    "allowed_tickers": [
+      "NVTK",
+      "YNDX",
+      "TATN",
+      "LKOH",
+      "POLY",
+      "SNGS",
+      "MGNT"
+    ],
+    "position_size_pct": 0.3,
+    "stop_loss_pct": 0.01,
+    "take_profit_pct": 0.05,
+    "trailing_stop_pct": 0.015,
+    "use_partial_tp": true,
+    "partial_tp_level": 0.03,
+    "partial_tp_pct": 0.5,
+    "commission_bps": 5.0,
+    "slippage_bps": 5.0,
+    "market_momentum_threshold": -0.02,
+    "safe_hours": [
+      10,
+      17
+    ],
+    "use_macd_filter": false,
+    "use_time_filter": false,
+    "use_volume_spike": false,
+    "volume_spike_threshold": 1.2
+  },
+  "results": {
+    "total_pnl": 25709.416225832494,
+    "return_pct": 2.5709416225832493,
+    "trades": 28,
+    "win_rate": 0.39285714285714285,
+    "sl_triggers": 17,
+    "tp_triggers": 0,
+    "partial_tp_triggers": 11,
+    "trailing_triggers": 11,
+    "by_ticker": {
+      "GAZP": {
+        "pnl": 0,
+        "trades": 0,
+        "wins": 0,
+        "losses": 0,
+        "stop_losses": 0,
+        "take_profits": 0,
+        "trailing_exits": 0,
+        "partial_tp_exits": 0
+      },
+      "LKOH": {
+        "pnl": 1239.5562282153994,
+        "trades": 3,
+        "wins": 1,
+        "losses": 2,
+        "stop_losses": 2,
+        "take_profits": 0,
+        "trailing_exits": 1,
+        "partial_tp_exits": 1
+      },
+      "MGNT": {
+        "pnl": 3864.947756641593,
+        "trades": 4,
+        "wins": 1,
+        "losses": 3,
+        "stop_losses": 3,
+        "take_profits": 0,
+        "trailing_exits": 1,
+        "partial_tp_exits": 1
+      },
+      "NVTK": {
+        "pnl": 7791.9145188917055,
+        "trades": 5,
+        "wins": 2,
+        "losses": 3,
+        "stop_losses": 3,
+        "take_profits": 0,
+        "trailing_exits": 2,
+        "partial_tp_exits": 2
+      },
+      "POLY": {
+        "pnl": 1178.2194218796412,
+        "trades": 5,
+        "wins": 2,
+        "losses": 3,
+        "stop_losses": 3,
+        "take_profits": 0,
+        "trailing_exits": 2,
+        "partial_tp_exits": 2
+      },
+      "SBER": {
+        "pnl": 0,
+        "trades": 0,
+        "wins": 0,
+        "losses": 0,
+        "stop_losses": 0,
+        "take_profits": 0,
+        "trailing_exits": 0,
+        "partial_tp_exits": 0
+      },
+      "SNGS": {
+        "pnl": 1628.8282235649983,
+        "trades": 2,
+        "wins": 1,
+        "losses": 1,
+        "stop_losses": 1,
+        "take_profits": 0,
+        "trailing_exits": 1,
+        "partial_tp_exits": 1
+      },
+      "SNGSP": {
+        "pnl": 0,
+        "trades": 0,
+        "wins": 0,
+        "losses": 0,
+        "stop_losses": 0,
+        "take_profits": 0,
+        "trailing_exits": 0,
+        "partial_tp_exits": 0
+      },
+      "TATN": {
+        "pnl": 2214.0355577474515,
+        "trades": 4,
+        "wins": 2,
+        "losses": 2,
+        "stop_losses": 2,
+        "take_profits": 0,
+        "trailing_exits": 2,
+        "partial_tp_exits": 2
+      },
+      "YNDX": {
+        "pnl": 7791.9145188917055,
+        "trades": 5,
+        "wins": 2,
+        "losses": 3,
+        "stop_losses": 3,
+        "take_profits": 0,
+        "trailing_exits": 2,
+        "partial_tp_exits": 2
+      }
+    }
+  }
+}

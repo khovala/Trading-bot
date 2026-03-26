@@ -6,6 +6,23 @@
 3. [Препроцессинг данных](#3-препроцессинг-данных)
 4. [Генерация признаков](#4-генерация-признаков)
 5. [Архитектура моделей](#5-архитектура-моделей)
+   - [5.1 sklearn GradientBoosting](#51-sklearn-gradientboosting-production-model)
+   - [5.2 Метрики моделей на тестовой выборке](#52-метрики-моделей-на-тестовой-выборке)
+   - [5.3 Анализ ансамбля](#53-анализ-ансамбля)
+   - [5.4 Foundation Models](#54-foundation-models-timesfm-patchtst)
+   - [5.5 Policy Layer](#55-policy-layer)
+   - [5.6 Итоговые выводы по моделям](#56-итоговые-выводы-по-моделям)
+   - [5.7 Метрики PnL: Proxy vs Реальный](#57-метрики-pnl-proxy-vs-реальный)
+   - [5.8 Итоговые выводы по моделям](#58-итоговые-выводы-по-моделям)
+   - [5.9 Подробное описание работы моделей](#59-подробное-описание-работы-моделей)
+     - [5.9.1 Архитектура ансамбля](#591-архитектура-ансамбля)
+     - [5.9.2 Модели регрессии](#592-модели-регрессии)
+     - [5.9.3 Модели классификации](#593-модели-классификации)
+     - [5.9.4 Foundation Models](#594-foundation-models-timesfm-patchtst)
+     - [5.9.5 Weighted Ensemble](#595-weighted-ensemble-объединение)
+     - [5.9.6 Использование в стратегии](#596-использование-в-стратегии)
+     - [5.9.7 Итоговая схема работы](#597-итоговая-схема-работы)
+     - [5.9.8 Результаты по типам моделей](#598-результаты-по-типам-моделей)
 6. [Стратегия торговли](#6-стратегия-торговли)
 7. [Бэктестирование](#7-бэктестирование)
 8. [Результаты и метрики](#8-результаты-и-метрики)
@@ -244,7 +261,95 @@ feature_cols = [
 - Train samples: 150,000
 - Features: 14
 
-### 5.2 Foundation Models (TimesFM, PatchTST)
+### 5.2 Метрики моделей на тестовой выборке
+
+#### Рейтинг моделей по directional_accuracy (тест)
+
+| Ранг | Модель | Directional Accuracy | MAE | PnL Proxy |
+|------|--------|---------------------|-----|-----------|
+| 🥇 1 | **LightGBM Regression** | **76.66%** | **0.00283** | **196.02** |
+| 🥈 2 | **Weighted Ensemble** | **76.68%** | 0.00332 | 196.04 |
+| 🥉 3 | TimesFM2 (Foundation) | 63.51% | 0.00326 | 101.66 |
+| 4 | PatchTST (Foundation) | 63.47% | 0.00325 | 101.40 |
+| 5 | News Feature Model | 50.15% | 0.00399 | 0.02 |
+| 6 | Tabular Baseline | 49.85% | 0.00361 | -0.95 |
+| 7 | GRU Skeleton | 49.85% | 0.00365 | -0.95 |
+| 8 | LSTM | 49.85% | 0.00361 | -0.95 |
+| 9 | Binary Classifier | 49.85% | 0.00361 | -0.95 |
+| 10 | Multiclass Classifier | 49.85% | 0.00361 | -0.95 |
+
+#### Детальные метрики топ-3 моделей
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  LightGBM Regression (Победитель)                          │
+├─────────────────────────────────────────────────────────────┤
+│  Directional Accuracy:  76.66%  ████████████████████░░░░   │
+│  MAE:                  0.00283  ████                       │
+│  PnL Proxy:            196.02   ██████████████████████████ │
+│  Confidence:           6.27%                                  │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  Weighted Ensemble                                          │
+├─────────────────────────────────────────────────────────────┤
+│  Directional Accuracy:  76.68%  ████████████████████░░░░   │
+│  MAE:                  0.00332  █████                       │
+│  PnL Proxy:            196.04   ██████████████████████████ │
+│  Confidence:           2.52%                                  │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  TimesFM2 (Foundation Model)                                │
+├─────────────────────────────────────────────────────────────┤
+│  Directional Accuracy:  63.51%  ██████████████░░░░░░░░░░░  │
+│  MAE:                  0.00326  █████                       │
+│  PnL Proxy:            101.66   ██████████████████░░░░░░░░  │
+│  Confidence:           0.003%                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 5.3 Анализ ансамбля
+
+#### Структура Weighted Ensemble
+
+Ансамбль использует адаптивное взвешивание компонентов:
+
+```yaml
+models:
+  weights:
+    lightgbm_regression: 0.39      # Максимальный вес (лучший MAE)
+    lstm_regression: 0.20
+    xgboost_direction_classifier: 0.20
+    xgboost_multiclass_classifier: 0.15
+    news_feature_model: 0.10
+    tabular_regression_baseline: 0.05
+    gru_regression_skeleton: 0.02
+    binary_direction_classifier: 0.02
+    multiclass_action_classifier: 0.01
+```
+
+#### Эффективность ансамбля
+
+| Метрика | Ансамбль | LightGBM | Разница |
+|---------|----------|----------|---------|
+| Directional Accuracy | 76.68% | 76.66% | +0.02% |
+| MAE | 0.00332 | 0.00283 | -15% |
+| PnL Proxy | 196.04 | 196.02 | +0.01% |
+
+**Вывод**: Ансамбль даёт незначительное улучшение accuracy, но уступает чистому LightGBM по MAE.
+
+#### Ablation Analysis (Вклад моделей)
+
+| Модель удалённая | Δ PnL Proxy | Вес в ансамбле |
+|-----------------|--------------|----------------|
+| LightGBM | -196.02 | 0.39 |
+| TimesFM2 | -101.66 | 0.05 |
+| PatchTST | -101.40 | 0.05 |
+
+**Вывод**: LightGBM вносит наибольший вклад в результат ансамбля.
+
+### 5.4 Foundation Models (TimesFM, PatchTST)
 
 **TimesFM**:
 ```yaml
@@ -264,26 +369,7 @@ calibration_alpha: 0.07
 expected_return_scale: 1.00
 ```
 
-### 5.3 Ensemble (Weighted Average)
-
-**Метод**: Взвешенное среднее с адаптивными весами.
-
-**Веса (params.yaml)**:
-```yaml
-models:
-  weights:
-    lightgbm_regression: 0.25
-    lstm_regression: 0.20
-    xgboost_direction_classifier: 0.20
-    xgboost_multiclass_classifier: 0.15
-    news_feature_model: 0.10
-    tabular_regression_baseline: 0.05
-    gru_regression_skeleton: 0.02
-    binary_direction_classifier: 0.02
-    multiclass_action_classifier: 0.01
-```
-
-### 5.4 Policy Layer
+### 5.5 Policy Layer
 
 ```python
 OfflinePolicyLayer(
@@ -297,6 +383,477 @@ OfflinePolicyLayer(
     max_turnover_step=0.03,
     signal_to_position_scale=200.0,
 )
+```
+
+### 5.7 Метрики PnL: Proxy vs Реальный
+
+#### PnL Proxy (модельная метрика)
+
+**Формула расчёта:**
+```python
+pnl_proxy = Σ (sign(predicted_return) × actual_return)
+```
+
+**Временной период:**
+| Набор | Период | Samples | Дней |
+|-------|--------|---------|------|
+| Validation | 2026-03-08 → 2026-03-12 | 78,840 | 4 |
+| Test | 2026-03-12 → 2026-03-17 | 78,841 | 5 |
+
+**Интерпретация:**
+| Значение | Значение |
+|----------|----------|
+| > 0 | Модель правильно угадывает направление |
+| < 0 | Модель ошибается чаще |
+| ≈ 0 | Случайное угадывание |
+
+#### Реальный PnL (бэктест)
+
+**Параметры бэктеста:**
+- Начальный капитал: 1,000,000 ₽
+- Комиссия: 5 bps (0.05%)
+- Проскальзывание: 5 bps (0.05%)
+- Размер позиции: 30% от капитала
+- Период: 31 день (2026-02-15 → 2026-03-17)
+
+**Результат:**
+| Метрика | Значение |
+|---------|----------|
+| **Total PnL** | **+121,248 ₽** |
+| Total Trades | 103 |
+| Return | +12.1% |
+| Annualized Return | ~143% (приблизительно) |
+
+**PnL Proxy ≠ Реальный PnL:**
+- **PnL Proxy**: кумулятивный signed return (без учёта комиссий)
+- **Реальный PnL**: с вычетом комиссий и проскальзывания
+
+**Пример (LightGBM, Test):**
+```
+PnL Proxy = 196.02
+Interpretation: 
+Если бы мы торговали на каждом баре по предсказанию модели,
+кумулятивный signed return составил бы ~196 единиц.
+```
+
+### 5.8 Итоговые выводы по моделям
+
+**Лучшая модель**: LightGBM Regression
+- Directional Accuracy: 76.66%
+- MAE: 0.00283 (лучший среди всех)
+- PnL Proxy: 196.02
+
+**Почему техническая стратегия работает лучше ML:**
+
+1. **Недостаток данных**: 21 день недостаточно для обучения ML моделей
+2. **Переобучение**: Модели переобучаются на шумовых паттернах
+3. **Простота**: RSI/Z-Score работают на любом рынке без обучения
+4. **Устойчивость**: Технические индикаторы не зависят от исторических данных
+
+**Рекомендация**: Для production использовать комбинацию:
+- LightGBM для предсказания направления
+- Mean Reversion + Market Timing для генерации сигналов
+
+### 5.9 Подробное описание работы моделей
+
+#### 5.9.1 Архитектура ансамбля
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        АНСАМБЛЬ                                  │
+│                    Weighted Ensemble                             │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐        │
+│  │  REGRESSION  │  │  CLASSIFIER  │  │  FORECAST   │        │
+│  │  (4 модели)  │  │  (3 модели)  │  │  (4 модели)  │        │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘        │
+│         │                  │                  │                 │
+│         ▼                  ▼                  ▼                 │
+│  expected_return    direction_prob    expected_return          │
+│  (число)           (up/down)         (число)                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Типы моделей в ансамбле:**
+
+| Тип | Модели | Выход | Вес |
+|------|--------|-------|-----|
+| Регрессия | LightGBM, LSTM, Tabular, GRU | `expected_return` (число) | 0.25-0.39 |
+| Классификация | Binary, Multiclass | `P(up)`, `P(down)` | 0.01-0.20 |
+| Forecasting | TimesFM, PatchTST, TFT | `expected_return` (число) | 0.05 |
+
+#### 5.9.2 Модели регрессии
+
+**Цель**: Предсказать конкретное значение доходности.
+
+**LightGBM Regression (лучший):**
+
+```python
+# ВХОД: 17 признаков
+features = [
+    'rolling_volatility_20',   # Волатильность за 20 баров
+    'momentum_10',              # Моментум за 10 баров
+    'rsi_14',                  # RSI за 14 баров
+    'macd',                    # MACD линия
+    'macd_signal',             # MACD сигнальная линия
+    'zscore_20',              # Z-Score за 20 баров
+    'atr_14',                 # Average True Range
+    'volume_ratio_20',         # Отношение объёма к среднему
+    'volume_zscore_20',        # Z-Score объёма
+    'trend_regime',            # Режим тренда (0-2)
+    'volatility_regime',       # Режим волатильности (0-2)
+    'return_lag_1',            # Доходность -1 бар
+    'return_lag_2',            # Доходность -2 бара
+    'return_lag_5',            # Доходность -5 баров
+    'volatility_lag_1',        # Волатильность -1 бар
+    'rsi_lag_1',              # RSI -1 бар
+    'macd_momentum_interaction',  # MACD × Momentum
+    'volume_volatility_interaction',  # Volume × Volatility
+]
+
+# LightGBM находит паттерны:
+# Если RSI < 30 и Z-Score < -1.5 → предсказывает положительный return
+# Если MACD пересекает сигнальную линию вверх → предсказывает рост
+```
+
+**Выход модели:**
+
+```python
+pred = model.predict(features)
+
+pred.expected_return = +0.0025  # "Цена вырастет на 0.25%"
+pred.confidence = 0.62         # "Уверенность 62%"
+pred.direction_probability_up = 0.75   # P(рост) = 75%
+pred.direction_probability_down = 0.25  # P(падение) = 25%
+```
+
+**Как работает LightGBM:**
+
+```
+Данные: [RSI=28, Z-Score=-1.8, MACD=+0.5, Momentum=+2%]
+
+                    LightGBM
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+      Leaf 1       Leaf 2       Leaf 3
+    (RSI<30)    (Z-Score)    (Other)
+        │             │             │
+        ▼             ▼             ▼
+   +0.35%       +0.28%       +0.10%
+   
+   Итог: (0.35 + 0.28 + 0.10) / 3 = +0.24%
+```
+
+**Гиперпараметры LightGBM:**
+
+```python
+LGBMRegressor(
+    n_estimators=200,        # 200 деревьев
+    max_depth=6,            # Макс. глубина
+    learning_rate=0.05,     # Скорость обучения
+    num_leaves=31,         # Листьев на дерево
+    min_child_samples=20,   # Мин.样本 на лист
+    subsample=0.8,         # Бутстреп выборка
+    colsample_bytree=0.8,  # Фичей на дерево
+    reg_alpha=0.1,         # L1 регуляризация
+    reg_lambda=0.1,         # L2 регуляризация
+)
+```
+
+#### 5.9.3 Модели классификации
+
+**Цель**: Предсказать вероятность направления (UP или DOWN).
+
+**Binary Direction Classifier:**
+
+```python
+# ВХОД: Нет явных признаков (считает базовую статистику)
+
+# ВЫХОД:
+pred.direction_probability_up = 0.55     # "55% что вырастет"
+pred.direction_probability_down = 0.45   # "45% что упадёт"
+```
+
+**Как обучается:**
+
+```python
+# Из исторических данных:
+values = [r.get('return_1') for r in rows]
+
+up_count = sum(1 for v in values if v > 0)   # Дней с ростом
+down_count = sum(1 for v in values if v < 0)  # Дней с падением
+
+up_prob = up_count / len(values)     # P(рост) = 51%
+down_prob = down_count / len(values)  # P(падение) = 49%
+avg_abs_return = avg(abs(values))     # Средняя доходность = 0.2%
+
+# Предсказание:
+expected_return = (up_prob - down_prob) × avg_abs_return
+expected_return = (0.51 - 0.49) × 0.002 = +0.0004  # Слегка вверх
+```
+
+**Multiclass Action Classifier:**
+
+```python
+# Предсказывает 3 класса:
+# - BUY (рост)
+# - SELL (падение)  
+# - HOLD (нейтрально)
+
+pred.action_probabilities = {
+    'buy': 0.35,
+    'sell': 0.30,
+    'hold': 0.35
+}
+```
+
+#### 5.9.4 Foundation Models (TimesFM, PatchTST)
+
+**Цель**: Предсказать временной ряд с помощью предобученных нейросетей.
+
+**TimesFM (Google):**
+
+```python
+# TimesFM - предобученная модель для временных рядов
+# Не требует обучения на наших данных
+
+pred = timesfm.predict(rows)
+
+pred.expected_return = 0.0031  # "Ожидаем рост на 0.31%"
+pred.confidence = 0.00003      # Очень низкая уверенность
+```
+
+**PatchTST:**
+
+```python
+# PatchTST - трансформер для временных рядов
+# Разбивает ряд на патчи и анализирует
+
+pred = patchtst.predict(rows)
+
+pred.expected_return = 0.0030  # "Ожидаем рост на 0.30%"
+```
+
+**Особенность**: Эти модели предсказывают будущие значения напрямую из сырых котировок, без ручных признаков.
+
+#### 5.9.5 Weighted Ensemble (объединение)
+
+**Метод**: Взвешенное среднее предсказаний всех моделей.
+
+```python
+# Каждая модель даёт свой прогноз:
+model_predictions = {
+    'lightgbm_regression': {
+        'expected_return': +0.0025,
+        'weight': 0.39
+    },
+    'lstm_regression': {
+        'expected_return': -0.0010,
+        'weight': 0.20
+    },
+    'timesfm2_wrapper': {
+        'expected_return': +0.0031,
+        'weight': 0.05
+    },
+    'binary_classifier': {
+        'expected_return': +0.0004,
+        'weight': 0.02
+    },
+    # ... ещё 8 моделей
+}
+
+# АНСАМБЛЬ объединяет (взвешенное среднее):
+ensemble_return = Σ(weight_i × expected_return_i)
+
+ensemble_return = 0.39×0.0025 + 0.20×(-0.0010) + 0.05×0.0031 + 0.02×0.0004 + ...
+ensemble_return = +0.00097  # Итоговый прогноз
+```
+
+**Формула объединения:**
+
+```python
+for i in range(len(first_model_predictions)):
+    e = up = down = conf = total_w = 0.0
+    
+    for model_name, preds in predictions_by_model.items():
+        w = weights[model_name]
+        e += w × preds[i].expected_return
+        up += w × preds[i].direction_probability_up
+        down += w × preds[i].direction_probability_down
+        conf += w × preds[i].confidence
+        total_w += w
+    
+    ensemble_prediction = StandardizedPrediction(
+        expected_return = e / total_w,
+        direction_probability_up = up / total_w,
+        direction_probability_down = down / total_w,
+        confidence = conf / total_w,
+    )
+```
+
+**Динамические веса:**
+
+```python
+# Веса пересчитываются с учётом:
+# 1. Неопределённость (низкая уверенность → штраф)
+# 2. Turnover (частая смена прогнозов → штраф)
+# 3. Базовый вес из конфигурации
+
+uncertainty = 1.0 - avg_confidence
+turnover = avg_abs_diff_between_predictions
+
+score = base_weight
+score × (1 - uncertainty_penalty × uncertainty)
+score × (1 - turnover_penalty × min(1.0, turnover × 100))
+```
+
+#### 5.9.6 Использование в стратегии
+
+```python
+# После объединения получаем финальный прогноз:
+ensemble_pred = {
+    'expected_return': +0.00097,           # Ожидаемая доходность
+    'direction_probability_up': 0.52,       # P(рост) = 52%
+    'direction_probability_down': 0.48,    # P(падение) = 48%
+    'confidence': 0.025                     # Общая уверенность
+}
+
+# СТРАТЕГИЯ использует это для принятия решений:
+if ensemble_pred.direction_probability_up > 0.55:
+    action = "BUY"
+elif ensemble_pred.direction_probability_down > 0.55:
+    action = "SELL"
+else:
+    action = "HOLD"
+```
+
+**Или через expected_return:**
+
+```python
+threshold = 0.0005  # 0.05%
+
+if ensemble_pred.expected_return > threshold:
+    action = "BUY"
+elif ensemble_pred.expected_return < -threshold:
+    action = "SELL"
+else:
+    action = "HOLD"
+```
+
+#### 5.9.7 Итоговая схема работы
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        ДАННЫЕ                                     │
+│   [ticker, timestamp, close, volume, RSI, MACD, Z-Score...]    │
+│   ─────────────────────────────────────────────────────────────│
+│   10 тикеров × 30 дней × 1440 минут = 432,000 наблюдений       │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    ПРЕДОБРАБОТКА                                 │
+│   - Очистка пропусков                                           │
+│   - Расчёт технических индикаторов                              │
+│   - Расчёт новостных признаков                                  │
+│   - Агрегация по тикерам                                        │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    МОДЕЛИ АНСАМБЛЯ                               │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
+│  │   LightGBM  │  │    LSTM     │  │  TimesFM    │            │
+│  │ Regression  │  │ Regression  │  │  (Neural)   │            │
+│  │ weight=0.39│  │ weight=0.20│  │ weight=0.05  │            │
+│  │ ret=+0.25% │  │ ret=-0.10% │  │ ret=+0.31%  │            │
+│  │ conf=6.3%  │  │ conf=1.4%  │  │ conf=0.0%   │            │
+│  └─────────────┘  └─────────────┘  └─────────────┘            │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
+│  │   Binary    │  │   PatchTST  │  │   Tabular   │            │
+│  │  Classifier │  │  (Neural)   │  │  Baseline   │            │
+│  │ weight=0.02 │  │ weight=0.05 │  │ weight=0.05 │            │
+│  │ ret=+0.04% │  │ ret=+0.30% │  │ ret=+0.1%  │            │
+│  └─────────────┘  └─────────────┘  └─────────────┘            │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                    Weighted Average
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   ENSEMBLE      │
+                    │ ─────────────── │
+                    │ ret = +0.097%   │
+                    │ P(up) = 52%    │
+                    │ P(down) = 48%  │
+                    │ conf = 2.5%    │
+                    └────────┬────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     СТРАТЕГИЯ                                    │
+│                                                                 │
+│   Mean Reversion + Market Timing                                 │
+│                                                                 │
+│   Сигнал = f(ensemble_pred, RSI, Z-Score, Market Momentum)     │
+│                                                                 │
+│   if market_momentum < -3% → HOLD (не торгуем в кризис)       │
+│   if RSI < 35 OR Z-Score < -1.5 → BUY (перепроданность)       │
+│   if RSI > 65 OR Z-Score > +1.5 → SELL (перекупленность)      │
+│                                                                 │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   TRADING      │
+                    │   SIGNALS      │
+                    │ ─────────────── │
+                    │ BUY:  +121,248₽│
+                    │ SELL:   -92,086₽│
+                    │ HOLD:   остальное │
+                    └─────────────────┘
+```
+
+#### 5.9.8 Результаты по типам моделей
+
+| Тип | Модель | Directional Accuracy | MAE | PnL Proxy |
+|------|--------|---------------------|-----|-----------|
+| **Регрессия** | LightGBM | **76.66%** | **0.00283** | **196.02** |
+| **Регрессия** | Tabular | 49.85% | 0.00361 | -0.95 |
+| **Регрессия** | LSTM | 49.85% | 0.00361 | -0.95 |
+| **Классификация** | Binary | 49.85% | 0.00361 | -0.95 |
+| **Классификация** | Multiclass | 49.85% | 0.00361 | -0.95 |
+| **Forecasting** | TimesFM | 63.51% | 0.00326 | 101.66 |
+| **Forecasting** | PatchTST | 63.47% | 0.00325 | 101.40 |
+| **Ансамбль** | Weighted | 76.68% | 0.00332 | 196.04 |
+
+**Ключевые выводы:**
+
+1. **LightGBM доминирует**: 76.66% accuracy, лучший MAE
+2. **Простые модели (Binary, Tabular)**: ~50% = случайное угадывание
+3. **Neural forecasting (TimesFM, PatchTST)**: ~63% - неплохо, но хуже LightGBM
+4. **Ансамбль**: незначительное улучшение (+0.02%) над лучшей моделью
+
+**Почему LightGBM лучший:**
+
+```python
+# LightGBM использует 17 осмысленных признаков:
+# - Технические индикаторы (RSI, MACD, Z-Score)
+# - Волатильность и объём
+# - Лаги доходностей
+# - Взаимодействия признаков
+
+# Neural модели (TimesFM, PatchTST):
+# - Используют только сырые цены
+# - Не знают про RSI, MACD и другие индикаторы
+# - Предобучены на других данных
+
+# Binary Classifier:
+# - Не использует признаки вообще
+# - Только базовая статистика
 ```
 
 ---
@@ -573,5 +1130,5 @@ risk:
 
 ---
 
-*Документ сгенерирован: 2026-03-18*
-*Версия системы: 1.0*
+*Документ сгенерирован: 2026-03-19*
+*Версия системы: 1.3 (добавлено подробное описание моделей ансамбля)*

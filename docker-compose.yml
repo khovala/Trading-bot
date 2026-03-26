@@ -1,5 +1,15 @@
 version: "3.9"
 
+x-common-env: &common-env
+  TZ: "Europe/Moscow"
+  LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+  MLFLOW_TRACKING_URI: "${MLFLOW_TRACKING_URI:-http://mlflow:5000}"
+  MLFLOW_ARTIFACT_ROOT: "${MLFLOW_ARTIFACT_ROOT:-s3://moex-trading-mlflow}"
+  AWS_ACCESS_KEY_ID: "${YC_ACCESS_KEY_ID}"
+  AWS_SECRET_ACCESS_KEY: "${YC_SECRET_ACCESS_KEY}"
+  AWS_REGION: "${YC_REGION:-ru-central1}"
+  MLFLOW_S3_ENDPOINT_URL: "${YC_S3_ENDPOINT:-https://storage.yandexcloud.net}"
+
 services:
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.22.0
@@ -112,6 +122,23 @@ services:
       - alertmanager_data:/alertmanager
     env_file:
       - .env
+    restart: unless-stopped
+    networks:
+      - trading-network
+
+  alertmanager-telegram:
+    build:
+      context: ./infra/alertmanager
+      dockerfile: Dockerfile.telegram
+    container_name: alertmanager-telegram
+    ports:
+      - "9080:9080"
+    env_file:
+      - .env
+    environment:
+      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN}"
+      TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID}"
+      PORT: "9080"
     restart: unless-stopped
     networks:
       - trading-network
@@ -240,6 +267,20 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - trading-network
+
+  trading-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.monitor
+    container_name: trading-monitor
+    command: python trading_session_monitor.py
+    env_file:
+      - .env
+    volumes:
+      - /tmp:/tmp
     restart: unless-stopped
     networks:
       - trading-network

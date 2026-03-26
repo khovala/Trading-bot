@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-03-19T11:58:57.814364+00:00",
+  "strategy": "HourlyMLStrategy",
+  "period": "79 days",
+  "timeframe": "1H",
+  "data_points": 18380,
+  "results": {
+    "total_pnl": -548747.4245831072,
+    "trades": 3981,
+    "win_rate": 0.4235116804822909,
+    "by_ticker": {
+      "GAZP": {
+        "pnl": -101215.76257389877,
+        "trades": 362,
+        "wins": 159,
+        "losses": 158,
+        "final_cash": 764.6396261012509
+      },
+      "LKOH": {
+        "pnl": -92544.7531680228,
+        "trades": 488,
+        "wins": 218,
+        "losses": 181,
+        "final_cash": 544.4639319772155
+      },
+      "MGNT": {
+        "pnl": 64866.7650682332,
+        "trades": 293,
+        "wins": 147,
+        "losses": 125,
+        "final_cash": 151064.8363682332
+      },
+      "NVTK": {
+        "pnl": -69321.68797235185,
+        "trades": 446,
+        "wins": 173,
+        "losses": 186,
+        "final_cash": 31435.159727648126
+      },
+      "POLY": {
+        "pnl": -97433.64725218996,
+        "trades": 393,
+        "wins": 168,
+        "losses": 172,
+        "final_cash": 1350.5699478100248
+      },
+      "SBER": {
+        "pnl": -101267.82756265887,
+        "trades": 437,
+        "wins": 172,
+        "losses": 202,
+        "final_cash": 880.3732373411221
+      },
+      "SNGS": {
+        "pnl": -76560.84918556052,
+        "trades": 458,
+        "wins": 186,
+        "losses": 187,
+        "final_cash": 41003.67881443953
+      },
+      "SNGSP": {
+        "pnl": -87926.18294151385,
+        "trades": 316,
+        "wins": 131,
+        "losses": 152,
+        "final_cash": 12246.003358486118
+      },
+      "TATN": {
+        "pnl": 81978.20897720812,
+        "trades": 342,
+        "wins": 159,
+        "losses": 145,
+        "final_cash": 173118.76157720812
+      },
+      "YNDX": {
+        "pnl": -69321.68797235185,
+        "trades": 446,
+        "wins": 173,
+        "losses": 186,
+        "final_cash": 31435.159727648126
+      }
+    }
+  },
+  "comparison": {
+    "minute_pnl": -11262578,
+    "minute_trades": 36989,
+    "hourly_pnl": -548747.4245831072,
+    "hourly_trades": 3981,
+    "improvement": 10713830.575416893
+  }
+}

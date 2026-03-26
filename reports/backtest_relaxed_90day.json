@@ -1,0 +1,123 @@
+{
+  "timestamp": "2026-03-23T12:28:54.419899+00:00",
+  "strategy": "RelaxedFilters90Day",
+  "config": {
+    "rsi_oversold": 35,
+    "rsi_overbought": 65,
+    "zscore_oversold": -1.5,
+    "zscore_overbought": 1.5,
+    "volume_ratio_min": 1.0,
+    "position_size_pct": 0.1,
+    "stop_loss_pct": 0.01,
+    "take_profit_pct": 0.05,
+    "trailing_stop_pct": 0.015,
+    "commission_bps": 5.0,
+    "slippage_bps": 5.0,
+    "market_momentum_threshold": -0.02,
+    "safe_hours": [
+      10,
+      17
+    ]
+  },
+  "results": {
+    "total_pnl": 4114.04095831541,
+    "return_pct": 0.411404095831541,
+    "trades": 45,
+    "win_rate": 0.4,
+    "sl_triggers": 27,
+    "tp_triggers": 1,
+    "trailing_triggers": 17,
+    "by_ticker": {
+      "GAZP": {
+        "pnl": -487.10723628495055,
+        "trades": 4,
+        "wins": 0,
+        "losses": 4,
+        "stop_losses": 4,
+        "take_profits": 0,
+        "trailing_exits": 0
+      },
+      "LKOH": {
+        "pnl": 426.3495187686007,
+        "trades": 3,
+        "wins": 1,
+        "losses": 2,
+        "stop_losses": 2,
+        "take_profits": 0,
+        "trailing_exits": 1
+      },
+      "MGNT": {
+        "pnl": 418.6922146220002,
+        "trades": 4,
+        "wins": 1,
+        "losses": 3,
+        "stop_losses": 3,
+        "take_profits": 1,
+        "trailing_exits": 0
+      },
+      "NVTK": {
+        "pnl": 1468.6725323845064,
+        "trades": 6,
+        "wins": 4,
+        "losses": 2,
+        "stop_losses": 2,
+        "take_profits": 0,
+        "trailing_exits": 4
+      },
+      "POLY": {
+        "pnl": 443.3490778981978,
+        "trades": 5,
+        "wins": 3,
+        "losses": 2,
+        "stop_losses": 2,
+        "take_profits": 0,
+        "trailing_exits": 3
+      },
+      "SBER": {
+        "pnl": -406.0358259410012,
+        "trades": 5,
+        "wins": 1,
+        "losses": 4,
+        "stop_losses": 4,
+        "take_profits": 0,
+        "trailing_exits": 1
+      },
+      "SNGS": {
+        "pnl": 483.06514627049916,
+        "trades": 2,
+        "wins": 1,
+        "losses": 1,
+        "stop_losses": 1,
+        "take_profits": 0,
+        "trailing_exits": 1
+      },
+      "SNGSP": {
+        "pnl": -323.9054561849511,
+        "trades": 6,
+        "wins": 1,
+        "losses": 5,
+        "stop_losses": 5,
+        "take_profits": 0,
+        "trailing_exits": 1
+      },
+      "TATN": {
+        "pnl": 622.2884543980011,
+        "trades": 4,
+        "wins": 2,
+        "losses": 2,
+        "stop_losses": 2,
+        "take_profits": 0,
+        "trailing_exits": 2
+      },
+      "YNDX": {
+        "pnl": 1468.6725323845064,
+        "trades": 6,
+        "wins": 4,
+        "losses": 2,
+        "stop_losses": 2,
+        "take_profits": 0,
+        "trailing_exits": 4
+      }
+    }
+  }
+}

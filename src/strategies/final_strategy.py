@@ -81,13 +81,11 @@ class MeanReversionMarketTimingStrategy:
                     positions.append(0.0)
                     continue
                 
-                # Mean reversion signals
+                # Mean reversion signals - LONG ONLY (no shorts)
                 if rsi < self.config.rsi_oversold or zscore < self.config.zscore_oversold:
                     positions.append(1.0)  # Long (oversold)
-                elif rsi > self.config.rsi_overbought or zscore > self.config.zscore_overbought:
-                    positions.append(-1.0)  # Short (overbought)
                 else:
-                    positions.append(0.0)  # Neutral
+                    positions.append(0.0)  # Neutral / Exit short positions
             
             for r, pos in zip(rows, positions):
                 r['policy_target_position'] = pos

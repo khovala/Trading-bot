@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-03-19T13:36:51.016245+00:00",
+  "timestamp": "2026-03-23T07:29:32.337074+00:00",
   "strategy": "EnsembleStopLoss",
-  "period": "79 days",
+  "period": "15 days",
   "timeframe": "1H",
   "features": {
     "ensemble_models": [
@@ -12,89 +12,89 @@
     "stop_loss_pct": 0.02,
     "take_profit_pct": 0.03,
     "position_sizing": "dynamic",
-    "prob_threshold": 0.55
+    "prob_threshold": 0.6
   },
   "results": {
-    "total_pnl": -309209.5860266794,
-    "trades": 5985,
-    "stop_losses": 419,
-    "win_rate": 0.49757727652464495,
+    "total_pnl": -25463.151224576442,
+    "trades": 1061,
+    "stop_losses": 87,
+    "win_rate": 0.4948162111215834,
     "by_ticker": {
       "GAZP": {
-        "pnl": -16264.7113632229,
-        "trades": 593,
-        "wins": 306,
-        "losses": 263,
-        "stop_losses": 23
+        "pnl": -7006.18981940318,
+        "trades": 107,
+        "wins": 51,
+        "losses": 54,
+        "stop_losses": 1
       },
       "LKOH": {
-        "pnl": -43048.277732490424,
-        "trades": 610,
-        "wins": 301,
-        "losses": 245,
-        "stop_losses": 63
+        "pnl": -5523.6873938005265,
+        "trades": 107,
+        "wins": 53,
+        "losses": 41,
+        "stop_losses": 12
       },
       "MGNT": {
-        "pnl": -22021.65326941087,
-        "trades": 572,
-        "wins": 290,
-        "losses": 278,
-        "stop_losses": 4
+        "pnl": -4896.408152648298,
+        "trades": 99,
+        "wins": 43,
+        "losses": 56,
+        "stop_losses": 0
       },
       "NVTK": {
-        "pnl": -43500.95063706396,
-        "trades": 619,
-        "wins": 305,
-        "losses": 250,
-        "stop_losses": 64
-      },
-      "POLY": {
-        "pnl": -23448.083069943998,
-        "trades": 591,
-        "wins": 305,
-        "losses": 256,
-        "stop_losses": 29
-      },
-      "SBER": {
-        "pnl": -26462.126385467753,
-        "trades": 585,
-        "wins": 276,
-        "losses": 264,
-        "stop_losses": 45
-      },
-      "SNGS": {
-        "pnl": -42795.900727069435,
-        "trades": 609,
-        "wins": 282,
-        "losses": 226,
-        "stop_losses": 101
-      },
-      "SNGSP": {
-        "pnl": -23490.852883776523,
-        "trades": 606,
-        "wins": 314,
-        "losses": 276,
-        "stop_losses": 15
-      },
-      "TATN": {
-        "pnl": -24676.079321169564,
-        "trades": 581,
-        "wins": 294,
-        "losses": 276,
+        "pnl": 2436.505082862824,
+        "trades": 108,
+        "wins": 58,
+        "losses": 39,
         "stop_losses": 11
       },
+      "POLY": {
+        "pnl": -3589.4362411121406,
+        "trades": 108,
+        "wins": 53,
+        "losses": 53,
+        "stop_losses": 1
+      },
+      "SBER": {
+        "pnl": 1881.189099633908,
+        "trades": 101,
+        "wins": 46,
+        "losses": 40,
+        "stop_losses": 15
+      },
+      "SNGS": {
+        "pnl": -6413.119525731894,
+        "trades": 114,
+        "wins": 50,
+        "losses": 32,
+        "stop_losses": 32
+      },
+      "SNGSP": {
+        "pnl": -3601.8042190797923,
+        "trades": 109,
+        "wins": 57,
+        "losses": 47,
+        "stop_losses": 4
+      },
+      "TATN": {
+        "pnl": -1186.7051381601623,
+        "trades": 100,
+        "wins": 56,
+        "losses": 44,
+        "stop_losses": 0
+      },
       "YNDX": {
-        "pnl": -43500.95063706396,
-        "trades": 619,
-        "wins": 305,
-        "losses": 250,
-        "stop_losses": 64
+        "pnl": 2436.505082862824,
+        "trades": 108,
+        "wins": 58,
+        "losses": 39,
+        "stop_losses": 11
       }
     }
   },
   "comparison": {
     "minute_pnl": -11262578,
     "hourly_ml_pnl": -997167,
-    "ensemble_pnl": -309209.5860266794
+    "ensemble_pnl": -25463.151224576442
   }
 }

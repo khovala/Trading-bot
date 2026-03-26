@@ -72,7 +72,7 @@ with DAG(
     DAG_ID,
     default_args=default_args,
     description="Daily ML trading pipeline with data collection, training, and backtesting",
-    schedule_interval="0 6 * * *",
+    schedule_interval="0 5 * * *",
     start_date=days_ago(1),
     catchup=False,
     max_active_runs=1,

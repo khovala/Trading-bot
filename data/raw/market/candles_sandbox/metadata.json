@@ -1,0 +1,17 @@
+{
+  "fetched_at": "2026-03-19T13:26:50.265361+00:00",
+  "period": "2026-03-12T13:26:49.039431+00:00 to 2026-03-19T13:26:49.039431+00:00",
+  "instruments": {
+    "SBER": "BBG004730N88",
+    "GAZP": "BBG00475KKY8",
+    "LKOH": "BBG004731428",
+    "YNDX": "BBG00B5QFGK3",
+    "POLY": "BBG00Y72NMN1",
+    "NVTK": "BBG004732LP8",
+    "MGNT": "BBG00475BF52",
+    "SNGS": "BBG004722R36",
+    "SNGSP": "BBG00475BD72",
+    "TATN": "BBG0047315D4"
+  },
+  "total_candles": 0
+}

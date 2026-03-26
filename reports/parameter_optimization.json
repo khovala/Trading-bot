@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-03-23T07:58:24.168901+00:00",
+  "strategy": "ParameterOptimization",
+  "best_params": {
+    "sl": 0.01,
+    "tp": 0.05,
+    "pnl": 2173.915615179853,
+    "trades": 8,
+    "wins": 3,
+    "losses": 5,
+    "win_rate": 0.375,
+    "rr_ratio": 5.0,
+    "stop_losses": 5,
+    "take_profits": 3
+  },
+  "top_10": [
+    {
+      "sl": 0.01,
+      "tp": 0.05,
+      "pnl": 2173.915615179853,
+      "trades": 8,
+      "wins": 3,
+      "losses": 5,
+      "win_rate": 0.375,
+      "rr_ratio": 5.0,
+      "stop_losses": 5,
+      "take_profits": 3
+    },
+    {
+      "sl": 0.01,
+      "tp": 0.04,
+      "pnl": 2139.261240397,
+      "trades": 9,
+      "wins": 4,
+      "losses": 5,
+      "win_rate": 0.4444444444444444,
+      "rr_ratio": 4.0,
+      "stop_losses": 5,
+      "take_profits": 4
+    },
+    {
+      "sl": 0.012,
+      "tp": 0.05,
+      "pnl": 2074.3903428125504,
+      "trades": 8,
+      "wins": 3,
+      "losses": 5,
+      "win_rate": 0.375,
+      "rr_ratio": 4.166666666666667,
+      "stop_losses": 5,
+      "take_profits": 3
+    },
+    {
+      "sl": 0.012,
+      "tp": 0.04,
+      "pnl": 2039.7359680296981,
+      "trades": 9,
+      "wins": 4,
+      "losses": 5,
+      "win_rate": 0.4444444444444444,
+      "rr_ratio": 3.3333333333333335,
+      "stop_losses": 5,
+      "take_profits": 4
+    },
+    {
+      "sl": 0.01,
+      "tp": 0.035,
+      "pnl": 1940.3402611127494,
+      "trades": 9,
+      "wins": 4,
+      "losses": 5,
+      "win_rate": 0.4444444444444444,
+      "rr_ratio": 3.5000000000000004,
+      "stop_losses": 5,
+      "take_profits": 4
+    },
+    {
+      "sl": 0.012,
+      "tp": 0.035,
+      "pnl": 1840.8149887454474,
+      "trades": 9,
+      "wins": 4,
+      "losses": 5,
+      "win_rate": 0.4444444444444444,
+      "rr_ratio": 2.916666666666667,
+      "stop_losses": 5,
+      "take_profits": 4
+    },
+    {
+      "sl": 0.01,
+      "tp": 0.025,
+      "pnl": 1811.0612999422442,
+      "trades": 9,
+      "wins": 6,
+      "losses": 3,
+      "win_rate": 0.6666666666666666,
+      "rr_ratio": 2.5,
+      "stop_losses": 3,
+      "take_profits": 6
+    },
+    {
+      "sl": 0.012,
+      "tp": 0.025,
+      "pnl": 1751.464713140542,
+      "trades": 9,
+      "wins": 6,
+      "losses": 3,
+      "win_rate": 0.6666666666666666,
+      "rr_ratio": 2.0833333333333335,
+      "stop_losses": 3,
+      "take_profits": 6
+    },
+    {
+      "sl": 0.01,
+      "tp": 0.03,
+      "pnl": 1529.2465818285011,
+      "trades": 9,
+      "wins": 4,
+      "losses": 5,
+      "win_rate": 0.4444444444444444,
+      "rr_ratio": 3.0,
+      "stop_losses": 5,
+      "take_profits": 4
+    },
+    {
+      "sl": 0.012,
+      "tp": 0.03,
+      "pnl": 1429.7213094611993,
+      "trades": 9,
+      "wins": 4,
+      "losses": 5,
+      "win_rate": 0.4444444444444444,
+      "rr_ratio": 2.5,
+      "stop_losses": 5,
+      "take_profits": 4
+    }
+  ],
+  "total_combinations_tested": 38
+}

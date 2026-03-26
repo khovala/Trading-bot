@@ -19,14 +19,13 @@ print("=" * 70)
 print("ADVANCED BACKTEST: ENSEMBLE + STOP-LOSS + POSITION SIZING")
 print("=" * 70)
 
-# Load minute data
-print("\n[1/7] Loading minute data...")
+# Load minute data - TEST ONLY for speed
+print("\n[1/7] Loading test data only...")
 from src.data.feature_store.io import read_parquet
 
-train_records = read_parquet(workspace / "data/processed/merged/train.parquet")
 test_records = read_parquet(workspace / "data/processed/merged/test.parquet")
 
-df_minute = pd.DataFrame(train_records + test_records)
+df_minute = pd.DataFrame(test_records)
 df_minute['timestamp'] = pd.to_datetime(df_minute['timestamp'])
 print(f"  Loaded {len(df_minute):,} minute bars")
 
@@ -100,8 +99,8 @@ df_hourly['proba_gb'] = proba_gb
 df_hourly['proba_et'] = proba_et
 df_hourly['proba_ensemble'] = (proba_gb + proba_et) / 2
 
-# Signal generation - only long positions with high confidence
-prob_threshold = 0.55  # Higher threshold = fewer but more confident trades
+# Signal generation - LONG ONLY with high confidence
+prob_threshold = 0.60  # Increased from 0.55 for more confident trades
 df_hourly['ensemble_signal'] = 0
 mask_up = df_hourly['proba_ensemble'] > prob_threshold
 df_hourly.loc[mask_up, 'ensemble_signal'] = 1
@@ -116,11 +115,13 @@ print(f"  Signals: Long={n_long:,}, Short={n_short:,}, Neutral={n_neutral:,}")
 print("\n[6/7] Running advanced backtest...")
 
 initial_cash = 1_000_000
-base_position_size_pct = 0.3
-max_position_size_pct = 0.5
-min_position_size_pct = 0.1
+base_position_size_pct = 0.15  # Reduced from 0.30 to 0.15 for lower risk
+max_position_size_pct = 0.25  # Reduced from 0.50
+min_position_size_pct = 0.08  # Reduced from 0.10
 stop_loss_pct = 0.02  # 2% stop-loss
 take_profit_pct = 0.03  # 3% take-profit
+trailing_stop_enabled = True
+trailing_stop_pct = 0.015  # 1.5% trailing stop
 commission_bps = 5.0
 slippage_bps = 5.0
 
@@ -148,6 +149,7 @@ for ticker in sorted(df_hourly['ticker'].unique()):
     
     entry_price = 0
     position_size_pct = base_position_size_pct
+    max_price = 0  # For trailing stop
     
     prices = tdf['close'].values
     signals = tdf['ensemble_signal'].values
@@ -164,7 +166,13 @@ for ticker in sorted(df_hourly['ticker'].unique()):
         position_size_pct = base_position_size_pct * (0.5 + confidence)
         position_size_pct = max(min_position_size_pct, min(max_position_size_pct, position_size_pct))
         
-        # Check stop-loss / take-profit
+        # Track max price for trailing stop
+        if position > 0:
+            if not hasattr(tdf, 'max_price'):
+                max_price = entry_price
+            max_price = max(max_price, curr_price)
+            
+        # Check stop-loss / take-profit / trailing stop
         if position != 0 and entry_price > 0:
             if position > 0:
                 price_change = (curr_price - entry_price) / entry_price
@@ -180,50 +188,48 @@ for ticker in sorted(df_hourly['ticker'].unique()):
                     cash -= abs(position) * curr_price * commission_bps / 10000
                     wins += 1
                     position = 0
+                elif trailing_stop_enabled:
+                    # Trailing stop check
+                    trailing_trigger = (max_price - curr_price) / max_price
+                    if trailing_trigger >= trailing_stop_pct and max_price > entry_price * 1.02:
+                        # Exit with profit using trailing stop
+                        cash += position * curr_price * (1 - slippage_bps / 10000)
+                        cash -= abs(position) * curr_price * commission_bps / 10000
+                        wins += 1
+                        position = 0
         
-        # Entry logic
-        if prev_signal != 0 and position == 0:
+        # Entry logic - LONG ONLY with volume filter
+        vol_ratio = volatility[i-1] if i > 0 else 1.0
+        if prev_signal > 0 and position == 0 and vol_ratio > 0:
             target_value = cash * position_size_pct
             qty = int(target_value / curr_price)
             if qty > 0:
                 cost = qty * curr_price * (1 + slippage_bps / 10000)
                 commission = cost * commission_bps / 10000
                 cash -= cost + commission
-                position = qty * (1 if prev_signal > 0 else -1)
+                position = qty
                 entry_price = curr_price
+                max_price = curr_price  # Initialize max_price on entry
                 trades += 1
         
-        # Track PnL
+        # Track PnL - LONG ONLY
         if position > 0:
             pnl += (curr_price - prev_price) * position
-        elif position < 0:
-            pnl += (prev_price - curr_price) * abs(position)
         
-        # Exit on signal change
-        if position != 0 and prev_signal == 0:
-            if position > 0:
-                cash += position * curr_price * (1 - slippage_bps / 10000)
-                cash -= abs(position) * curr_price * commission_bps / 10000
-                if curr_price > entry_price:
-                    wins += 1
-                else:
-                    losses += 1
+        # Exit on signal change - LONG ONLY
+        if position > 0 and prev_signal == 0:
+            cash += position * curr_price * (1 - slippage_bps / 10000)
+            cash -= position * curr_price * commission_bps / 10000
+            if curr_price > entry_price:
+                wins += 1
             else:
-                cash -= abs(position) * curr_price * (1 + slippage_bps / 10000)
-                cash -= abs(position) * curr_price * commission_bps / 10000
-                if curr_price < entry_price:
-                    wins += 1
-                else:
-                    losses += 1
+                losses += 1
             position = 0
     
-    # Close final position
-    if position != 0:
+    # Close final position - LONG ONLY
+    if position > 0:
         final_price = prices[-1]
-        if position > 0:
-            cash += position * final_price * (1 - slippage_bps / 10000)
-        else:
-            cash -= abs(position) * final_price * (1 + slippage_bps / 10000)
+        cash += position * final_price * (1 - slippage_bps / 10000)
     
     final_pnl = cash - (initial_cash / 10) + pnl
     
