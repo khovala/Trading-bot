@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Large generated artifacts (avoid committing)
+data/processed/merged/train.parquet
+data/processed/merged/train_val_expanded.parquet
+data/processed/market/features/market_features.parquet
+models/foundation/chronos2_wrapper.pkl
