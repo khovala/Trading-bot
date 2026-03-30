@@ -211,3 +211,11 @@ data/processed/merged/train.parquet
 data/processed/merged/train_val_expanded.parquet
 data/processed/market/features/market_features.parquet
 models/foundation/chronos2_wrapper.pkl
+
+# Generated artifacts (broad patterns)
+data/processed/**/*.parquet
+data/processed/**/*.pkl
+models/**/*.pkl
+
+# Local experiment tracking / stores
+mlflow_data/*.db

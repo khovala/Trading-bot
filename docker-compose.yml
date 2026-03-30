@@ -9,7 +9,7 @@ services:
     image: python:3.11-slim
     container_name: mlflow
     command: >
-      sh -c "pip install mlflow==2.22.0 && mlflow server --host 0.0.0.0 --port 5000 --allowed-hosts '*'"
+      sh -c "pip install mlflow==2.22.0 && mlflow server --host 0.0.0.0 --port 5000"
     ports:
       - "5000:5000"
     env_file:
