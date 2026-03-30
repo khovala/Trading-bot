@@ -1,25 +1,21 @@
 #!/usr/bin/env python3
 """
-Trading Session Monitor
-======================
-Отправляет бизнес-метрики в Telegram каждые 5 минут
+Trading Session Monitor - Local Version
+Запускать на локальном компьютере: python run_monitor_local.py
 """
 
-import sys
-sys.path.insert(0, '/Users/sergeyeliseev/moex-sandbox-platform')
-
 import os
+import sys
 import json
 import time
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from pathlib import Path
+from threading import Thread
 
 import requests
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-from prometheus_client import start_http_server, Gauge, Counter
+urllib3.disable_warnings()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,28 +26,6 @@ logger = logging.getLogger(__name__)
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 TINKOFF_TOKEN = os.getenv("TINKOFF_TOKEN", "")
-PROMETHEUS_PORT = int(os.getenv("PROMETHEUS_PORT", "8003"))
-
-MONITOR_BALANCE = Gauge("monitor_account_balance_rub", "Current account balance")
-MONITOR_UNREALIZED_PNL = Gauge("monitor_unrealized_pnl_rub", "Unrealized PnL")
-MONITOR_CUMULATIVE_PNL = Gauge("monitor_cumulative_pnl_rub", "Cumulative PnL")
-MONITOR_TOTAL_PNL = Gauge("monitor_total_pnl_rub", "Total PnL (realized + unrealized)")
-MONITOR_WINRATE = Gauge("monitor_winrate_percent", "Winrate percentage")
-MONITOR_TOTAL_TRADES = Gauge("monitor_total_trades", "Total closed trades")
-MONITOR_BUY_DEALS = Counter("monitor_buy_deals_total", "Total BUY deals")
-MONITOR_SELL_DEALS = Counter("monitor_sell_deals_total", "Total SELL deals")
-MONITOR_SL_CLOSED = Counter("monitor_sl_closed_total", "Closed by Stop Loss")
-MONITOR_TP_CLOSED = Counter("monitor_tp_closed_total", "Closed by Take Profit")
-MONITOR_COMMISSION = Counter("monitor_commission_rub", "Cumulative commission")
-MONITOR_SLIPPAGE = Counter("monitor_slippage_rub", "Cumulative slippage")
-
-
-def setup_prometheus():
-    try:
-        start_http_server(PROMETHEUS_PORT)
-        logger.info(f"Prometheus metrics server started on port {PROMETHEUS_PORT}")
-    except Exception as e:
-        logger.error(f"Failed to start Prometheus server: {e}")
 
 SESSION_STATS_FILE = Path("/tmp/paper_trading_session.json")
 CHECK_INTERVAL = 300
@@ -68,11 +42,12 @@ class TInvestClient:
         }
         self.session = requests.Session()
         self.session.verify = False
+        self.session.headers.update(self.headers)
 
     def _call(self, method: str, endpoint: str, data: dict = None):
         url = f"{API_BASE}/tinkoff.public.invest.api.contract.v1.{endpoint}"
         try:
-            resp = self.session.post(url, headers=self.headers, json=data or {}, timeout=30)
+            resp = self.session.post(url, json=data or {}, timeout=30)
             if resp.status_code != 200:
                 return None
             return resp.json()
@@ -189,19 +164,14 @@ def send_telegram_message(text: str):
         "parse_mode": "Markdown"
     }
 
-    proxies = {
-        "http": os.getenv("HTTP_PROXY"),
-        "https": os.getenv("HTTPS_PROXY"),
-    }
-    
     try:
-        response = requests.post(
-            url, 
-            json=payload, 
-            timeout=30,
-            proxies=proxies if proxies.get("https") else None
-        )
-        return response.status_code == 200
+        response = requests.post(url, json=payload, timeout=30)
+        if response.status_code == 200:
+            logger.info("Telegram message sent successfully")
+            return True
+        else:
+            logger.error(f"Telegram error: {response.status_code} - {response.text}")
+            return False
     except Exception as e:
         logger.error(f"Failed to send Telegram message: {e}")
         return False
@@ -230,7 +200,8 @@ def format_telegram_message(stats, positions, balance, unrealized_pnl, total_pnl
     message += f"   • Нереализованный: `{unrealized_pnl:,.2f} RUB`\n"
     message += f"   • Общий: `{total_pnl:,.2f} RUB`\n\n"
     
-    message += f"{emoji_winrate} *Winrate:* `{stats['won_trades']}/{stats['total_trades']} = {(stats['won_trades']/stats['total_trades']*100) if stats['total_trades'] > 0 else 0:.1f}%`\n\n"
+    winrate = (stats['won_trades']/stats['total_trades']*100) if stats['total_trades'] > 0 else 0
+    message += f"{emoji_winrate} *Winrate:* `{stats['won_trades']}/{stats['total_trades']} = {winrate:.1f}%`\n\n"
     
     message += f"{emoji_trades} *Сделки:*\n"
     message += f"   • BUY: `{stats['buy_deals']}`\n"
@@ -251,19 +222,21 @@ def format_telegram_message(stats, positions, balance, unrealized_pnl, total_pnl
 
 
 def main():
-    logger.info("Starting Trading Session Monitor")
-    
-    setup_prometheus()
+    logger.info("Starting Trading Session Monitor (Local Version)")
     
     if not TINKOFF_TOKEN:
-        logger.error("TINKOFF_TOKEN not set")
+        logger.error("TINKOFF_TOKEN not set. Set: export TINKOFF_TOKEN=your_token")
+        return
+    
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        logger.error("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set")
         return
     
     client = TInvestClient(TINKOFF_TOKEN)
     accounts = client.get_accounts()
     
     if not accounts:
-        logger.error("No accounts found")
+        logger.error("No accounts found. Run paper trading first!")
         return
     
     account_id = accounts[0]['id']
@@ -275,21 +248,9 @@ def main():
             positions, unrealized_pnl = get_positions_detail(client, account_id)
             balance = get_account_balance(client, account_id)
             total_pnl = stats['cumulative_pnl'] + unrealized_pnl
-            winrate = (stats['won_trades'] / stats['total_trades'] * 100) if stats['total_trades'] > 0 else 0
-            
-            MONITOR_BALANCE.set(balance)
-            MONITOR_UNREALIZED_PNL.set(unrealized_pnl)
-            MONITOR_CUMULATIVE_PNL.set(stats['cumulative_pnl'])
-            MONITOR_TOTAL_PNL.set(total_pnl)
-            MONITOR_WINRATE.set(winrate)
-            MONITOR_TOTAL_TRADES.set(stats['total_trades'])
             
             message = format_telegram_message(stats, positions, balance, unrealized_pnl, total_pnl)
-            
-            if send_telegram_message(message):
-                logger.info("Telegram message sent successfully")
-            else:
-                logger.warning("Failed to send Telegram message")
+            send_telegram_message(message)
                 
         except Exception as e:
             logger.error(f"Error in monitoring loop: {e}")

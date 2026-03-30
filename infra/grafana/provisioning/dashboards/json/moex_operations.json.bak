@@ -57,7 +57,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_pnl_rub",
+          "expr": "strategy_pnl_rub",
           "refId": "A",
           "legendFormat": "PnL"
         }
@@ -93,7 +93,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_drawdown_rub",
+          "expr": "strategy_drawdown",
           "legendFormat": "Drawdown",
           "refId": "A"
         }
@@ -132,7 +132,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_sharpe_ratio",
+          "expr": "strategy_sharpe",
           "legendFormat": "Sharpe",
           "refId": "A"
         }
@@ -171,7 +171,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_sortino_ratio",
+          "expr": "strategy_sortino",
           "legendFormat": "Sortino",
           "refId": "A"
         }
@@ -199,9 +199,9 @@
       },
       "pluginVersion": "8.0.0",
       "targets": [
-        {"expr": "paper_trade_sharpe_ratio", "legendFormat": "Sharpe", "refId": "A"},
-        {"expr": "paper_trade_sortino_ratio", "legendFormat": "Sortino", "refId": "B"},
-        {"expr": "paper_trade_calmar_ratio", "legendFormat": "Calmar", "refId": "C"}
+        {"expr": "strategy_sharpe", "legendFormat": "Sharpe", "refId": "A"},
+        {"expr": "strategy_sortino", "legendFormat": "Sortino", "refId": "B"},
+        {"expr": "strategy_calmar", "legendFormat": "Calmar", "refId": "C"}
       ],
       "title": "Risk-Adjusted Returns",
       "type": "timeseries"
@@ -226,8 +226,8 @@
       },
       "pluginVersion": "8.0.0",
       "targets": [
-        {"expr": "paper_trade_winrate", "legendFormat": "Hit Ratio", "refId": "A"},
-        {"expr": "paper_trade_positions_value_rub", "legendFormat": "Exposure", "refId": "B"}
+        {"expr": "strategy_hit_ratio", "legendFormat": "Hit Ratio", "refId": "A"},
+        {"expr": "strategy_exposure", "legendFormat": "Exposure", "refId": "B"}
       ],
       "title": "Hit Ratio & Exposure",
       "type": "timeseries"
@@ -252,8 +252,8 @@
       },
       "pluginVersion": "8.0.0",
       "targets": [
-        {"expr": "paper_trade_deals_total", "legendFormat": "Turnover", "refId": "A"},
-        {"expr": "paper_trade_unrealized_pnl_rub", "legendFormat": "WF Sharpe Mean", "refId": "B"}
+        {"expr": "strategy_turnover", "legendFormat": "Turnover", "refId": "A"},
+        {"expr": "walk_forward_sharpe_mean", "legendFormat": "WF Sharpe Mean", "refId": "B"}
       ],
       "title": "Turnover & Walk-Forward",
       "type": "timeseries"
@@ -297,7 +297,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_avg_win_rub",
+          "expr": "model_directional_accuracy",
           "refId": "A"
         }
       ],
@@ -335,7 +335,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_avg_loss_rub",
+          "expr": "model_mae_proxy",
           "refId": "A"
         }
       ],
@@ -362,8 +362,8 @@
       },
       "pluginVersion": "8.0.0",
       "targets": [
-        {"expr": "paper_trade_avg_win_rub", "legendFormat": "Accuracy", "refId": "A"},
-        {"expr": "paper_trade_max_drawdown_percent", "legendFormat": "Confidence", "refId": "B"}
+        {"expr": "model_directional_accuracy", "legendFormat": "Accuracy", "refId": "A"},
+        {"expr": "model_confidence", "legendFormat": "Confidence", "refId": "B"}
       ],
       "title": "Model Accuracy Over Time",
       "type": "timeseries"
@@ -407,7 +407,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_winrate",
+          "expr": "policy_hit_ratio",
           "refId": "A"
         }
       ],
@@ -445,7 +445,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_deals_total",
+          "expr": "policy_turnover_budget_violation_ratio",
           "refId": "A"
         }
       ],
@@ -472,8 +472,8 @@
       },
       "pluginVersion": "8.0.0",
       "targets": [
-        {"expr": "paper_trade_winrate", "legendFormat": "Hit Ratio", "refId": "A"},
-        {"expr": "paper_trade_slippage_rub", "legendFormat": "Utility Score", "refId": "B"}
+        {"expr": "policy_hit_ratio", "legendFormat": "Hit Ratio", "refId": "A"},
+        {"expr": "policy_utility_adjusted_score", "legendFormat": "Utility Score", "refId": "B"}
       ],
       "title": "Policy Performance",
       "type": "timeseries"
@@ -514,7 +514,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_total_trades_total",
+          "expr": "promotion_decision_flag",
           "refId": "A"
         }
       ],
@@ -541,8 +541,8 @@
       },
       "pluginVersion": "8.0.0",
       "targets": [
-        {"expr": "paper_trade_return_percent", "legendFormat": "HHI", "refId": "A"},
-        {"expr": "paper_trade_profit_factor", "legendFormat": "Ablation +", "refId": "B"}
+        {"expr": "ensemble_weight_concentration_hhi", "legendFormat": "HHI", "refId": "A"},
+        {"expr": "ensemble_ablation_positive_ratio", "legendFormat": "Ablation +", "refId": "B"}
       ],
       "title": "Ensemble Diagnostics",
       "type": "timeseries"
@@ -792,7 +792,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_signal_latency_seconds_sum",
+          "expr": "time() - pipeline_last_update_unix",
           "refId": "A"
         }
       ],
@@ -830,7 +830,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_positions_count",
+          "expr": "pipeline_report_count",
           "refId": "A"
         }
       ],
@@ -868,7 +868,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_positions_count",
+          "expr": "news_freshness_seconds",
           "refId": "A"
         }
       ],
@@ -904,7 +904,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "paper_trade_realized_pnl_rub",
+          "expr": "stale_data_flag",
           "refId": "A"
         }
       ],

@@ -3,23 +3,13 @@ version: "3.9"
 x-common-env: &common-env
   TZ: "Europe/Moscow"
   LOG_LEVEL: "${LOG_LEVEL:-INFO}"
-  MLFLOW_TRACKING_URI: "${MLFLOW_TRACKING_URI:-http://mlflow:5000}"
-  MLFLOW_ARTIFACT_ROOT: "${MLFLOW_ARTIFACT_ROOT:-s3://moex-trading-mlflow}"
-  AWS_ACCESS_KEY_ID: "${YC_ACCESS_KEY_ID}"
-  AWS_SECRET_ACCESS_KEY: "${YC_SECRET_ACCESS_KEY}"
-  AWS_REGION: "${YC_REGION:-ru-central1}"
-  MLFLOW_S3_ENDPOINT_URL: "${YC_S3_ENDPOINT:-https://storage.yandexcloud.net}"
 
 services:
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.22.0
+    image: python:3.11-slim
     container_name: mlflow
     command: >
-      mlflow server
-      --host 0.0.0.0
-      --port 5000
-      --default-artifact-root ${MLFLOW_ARTIFACT_ROOT:-s3://moex-trading-mlflow}
-      --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      sh -c "pip install mlflow==2.22.0 && mlflow server --host 0.0.0.0 --port 5000 --allowed-hosts '*'"
     ports:
       - "5000:5000"
     env_file:
@@ -27,15 +17,8 @@ services:
     environment:
       TZ: "Europe/Moscow"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
-      MLFLOW_TRACKING_URI: "${MLFLOW_TRACKING_URI:-http://mlflow:5000}"
-      MLFLOW_ARTIFACT_ROOT: "${MLFLOW_ARTIFACT_ROOT:-s3://moex-trading-mlflow}"
-      AWS_ACCESS_KEY_ID: "${YC_ACCESS_KEY_ID}"
-      AWS_SECRET_ACCESS_KEY: "${YC_SECRET_ACCESS_KEY}"
-      AWS_REGION: "${YC_REGION:-ru-central1}"
-      MLFLOW_S3_ENDPOINT_URL: "${YC_S3_ENDPOINT:-https://storage.yandexcloud.net}"
-    depends_on:
-      postgres:
-        condition: service_healthy
+    volumes:
+      - mlflow_data:/mlflow
     restart: unless-stopped
     networks:
       - trading-network
@@ -44,13 +27,13 @@ services:
     image: postgres:16-alpine
     container_name: postgres
     environment:
-      POSTGRES_DB: "${POSTGRES_DB:-trading}"
-      POSTGRES_USER: "${POSTGRES_USER:-trading_user}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB:-mlflow}"
+      POSTGRES_USER: "${POSTGRES_USER:-mlflow}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-mlflow_password}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trading_user} -d ${POSTGRES_DB:-trading}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mlflow} -d ${POSTGRES_DB:-mlflow}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -105,6 +88,8 @@ services:
       - prometheus_data:/prometheus
     env_file:
       - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     networks:
       - trading-network
@@ -164,6 +149,30 @@ services:
     networks:
       - trading-network
 
+  airflow-init:
+    image: ${AIRFLOW_IMAGE:-apache/airflow:2.9.3}
+    container_name: airflow-init
+    command: db init
+    env_file:
+      - .env
+    environment:
+      <<: *common-env
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-trading_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-trading}
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER:-trading_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-trading}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: "${AIRFLOW_FERNET_KEY}"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW_UID: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: "no"
+    networks:
+      - trading-network
+
   airflow-webserver:
     image: ${AIRFLOW_IMAGE:-apache/airflow:2.9.3}
     container_name: airflow-webserver
@@ -191,6 +200,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      airflow-init:
+        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - trading-network
@@ -210,16 +221,22 @@ services:
       AIRFLOW__CORE__FERNET_KEY: "${AIRFLOW_FERNET_KEY}"
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW_UID: "0"
+      MLFLOW_TRACKING_URI: "http://host.docker.internal:5000"
+      MLFLOW_ARTIFACT_ROOT: "/opt/airflow/mlflow_artifacts"
     volumes:
       - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
       - ./models:/opt/airflow/models
       - ./reports:/opt/airflow/reports
+      - ~/mlflow_artifacts:/opt/airflow/mlflow_artifacts
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
+      airflow-init:
+        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - trading-network
@@ -233,8 +250,8 @@ services:
     environment:
       TZ: "Europe/Moscow"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
-      MLFLOW_TRACKING_URI: "${MLFLOW_TRACKING_URI:-http://mlflow:5000}"
-      MLFLOW_ARTIFACT_ROOT: "${MLFLOW_ARTIFACT_ROOT:-s3://moex-trading-mlflow}"
+      MLFLOW_TRACKING_URI: "http://host.docker.internal:5000"
+      MLFLOW_ARTIFACT_ROOT: "/opt/airflow/mlflow_data/artifacts"
       AWS_ACCESS_KEY_ID: "${YC_ACCESS_KEY_ID}"
       AWS_SECRET_ACCESS_KEY: "${YC_SECRET_ACCESS_KEY}"
       AWS_REGION: "${YC_REGION:-ru-central1}"
@@ -248,7 +265,9 @@ services:
       AIRFLOW_UID: "0"
     volumes:
       - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
+      - ./mlflow_data:/opt/airflow/mlflow_data
       - ./models:/opt/airflow/models
       - ./reports:/opt/airflow/reports
     depends_on:
@@ -256,6 +275,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      airflow-init:
+        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - trading-network
@@ -285,6 +306,43 @@ services:
     networks:
       - trading-network
 
+  trainer:
+    image: python:3.11-slim
+    container_name: trainer
+    command: sh -c "pip install prometheus-client && python /app/trainer_metrics.py"
+    volumes:
+      - ./trainer_metrics.py:/app/trainer_metrics.py
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - trading-network
+
+  airflow-exporter:
+    image: python:3.11-slim
+    container_name: airflow-exporter
+    command: sh -c "pip install prometheus-client requests && python /app/airflow_exporter.py"
+    volumes:
+      - ./airflow_exporter.py:/app/airflow_exporter.py
+    environment:
+      - AIRFLOW_HOST=airflow-webserver
+      - PYTHONUNBUFFERED=1
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  mlflow-exporter:
+    image: python:3.11-slim
+    container_name: mlflow-exporter
+    command: sh -c "pip install prometheus-client requests && python /app/mlflow_exporter.py"
+    volumes:
+      - ./mlflow_exporter.py:/app/mlflow_exporter.py
+    environment:
+      - MLFLOW_HOST=mlflow
+      - PYTHONUNBUFFERED=1
+    networks:
+      - trading-network
+    restart: unless-stopped
+
   nginx:
     image: nginx:alpine
     container_name: nginx
@@ -307,6 +365,7 @@ networks:
 
 volumes:
   postgres_data:
+  mlflow_data:
   prometheus_data:
   alertmanager_data:
   grafana_data:
