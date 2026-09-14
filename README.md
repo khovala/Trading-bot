@@ -1,3 +1,11 @@
+## Highlights
+
+- Live production ML trading system on MOEX: **76.7% directional accuracy**, **+12.1% return / 31 days**, **profit factor 2.0**, max drawdown 8%.
+- Ensemble of LightGBM/XGBoost and time-series foundation models (Chronos, TimesFM, PatchTST, TFT, TimeXer).
+- Full MLOps: Airflow DAGs, MLflow tracking/registry, Docker, Terraform, Prometheus/Grafana.
+
+---
+
 
 # MOEX Sandbox Trading Platform (Phase 2 Upgrade)
 
